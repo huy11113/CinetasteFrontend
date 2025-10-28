@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cinematic-darker text-gray-100 font-sans;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-cinematic-accent text-white font-medium rounded-lg
+           hover:bg-cinematic-accent-light transition-all duration-300
+           hover:shadow-glow-red transform hover:scale-105;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-cinematic-gray-light text-white font-medium rounded-lg
+           hover:bg-cinematic-gray border border-gray-700 transition-all duration-300;
+  }
+
+  .card {
+    @apply bg-cinematic-gray rounded-xl overflow-hidden border border-gray-800
+           hover:border-cinematic-accent transition-all duration-300
+           hover:shadow-glow-red cursor-pointer;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-cinematic-gray-light border border-gray-700
+           rounded-lg text-white placeholder-gray-500
+           focus:outline-none focus:border-cinematic-accent focus:ring-2
+           focus:ring-cinematic-accent/50 transition-all duration-300;
+  }
+
+  .section-title {
+    @apply text-4xl md:text-5xl font-display font-bold mb-6
+           bg-gradient-to-r from-cinematic-gold to-cinematic-accent
+           bg-clip-text text-transparent;
+  }
+}
