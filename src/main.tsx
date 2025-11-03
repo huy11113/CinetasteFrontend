@@ -7,7 +7,7 @@ import { AuthProvider } from './contexts/AuthContext.tsx'; // <-- Import
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider> {/* <-- Bọc ở đây */}
+    <AuthProvider> {/* <-- Bọc ứng dụng */}
       <App />
     </AuthProvider>
   </StrictMode>

@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { Film, Search, User, Menu, X, Upload, Home, BookOpen, Users, LogOut, Plus } from 'lucide-react';
 import { Link, NavLink } from 'react-router-dom'; // <-- Dùng Link/NavLink
-import { useAuth } from '../contexts/AuthContext'; // <-- Import
+import { useAuth } from '../hooks/useAuth';
 import Button from './Button'; // <-- Import Button
+
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

@@ -1,93 +1,94 @@
 // src/contexts/AuthContext.tsx
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useState, useEffect, ReactNode } from 'react';
 import apiClient from '../services/apiClient';
-import { jwtDecode } from 'jwt-decode'; // Cài đặt: npm install jwt-decode
+import { jwtDecode } from 'jwt-decode';
 
+// Định nghĩa thông tin User ta lấy từ token
 interface User {
-  username: string;
-  userId: string;
-  // Thêm các trường khác nếu bạn lưu trong token, ví dụ: role
+  username: string; // Lấy từ 'sub'
+  userId: string; // Lấy từ 'userId'
 }
 
-interface AuthContextType {
+// ✅ THÊM "export" Ở ĐÂY
+export interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
   login: (loginIdentifier: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// ✅ THÊM "export" Ở ĐÂY
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Tạo Provider (component logic)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Hook này chạy 1 lần khi ứng dụng tải (F5)
   useEffect(() => {
-    // Kiểm tra token khi tải ứng dụng
-    setIsLoading(true);
     const storedToken = localStorage.getItem('jwtToken');
     if (storedToken) {
       try {
-        const decodedToken = jwtDecode<{ sub: string; userId: string }>(storedToken);
-        setUser({ username: decodedToken.sub, userId: decodedToken.userId });
-        setToken(storedToken);
+        const decodedToken = jwtDecode<{ sub: string; userId: string; exp: number }>(storedToken);
+        
+        // Kiểm tra token hết hạn
+        if (decodedToken.exp * 1000 > Date.now()) {
+          setUser({ username: decodedToken.sub, userId: decodedToken.userId });
+          setToken(storedToken);
+          apiClient.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+        } else {
+          localStorage.removeItem('jwtToken');
+        }
       } catch (error) {
-        console.error("Invalid token:", error);
+        console.error("Token không hợp lệ:", error);
         localStorage.removeItem('jwtToken');
       }
     }
     setIsLoading(false);
   }, []);
 
+  // Hàm Đăng nhập
   const login = async (loginIdentifier: string, password: string) => {
-    // Gọi API login từ user-service
     const response = await apiClient.post('/auth/login', {
       loginIdentifier,
       password,
     });
     
-    const { token, username } = response.data;
-    
-    // Giải mã token để lấy thông tin
+    const { token } = response.data; 
     const decodedToken = jwtDecode<{ sub: string; userId: string }>(token);
     
     localStorage.setItem('jwtToken', token);
     setUser({ username: decodedToken.sub, userId: decodedToken.userId });
     setToken(token);
+    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   };
 
-  const register = async (name: string, email: string, password: string) => {
-    // API backend của bạn chỉ yêu cầu username, email, password
+  // Hàm Đăng ký
+  const register = async (username: string, email: string, password: string) => {
     await apiClient.post('/auth/register', {
-      username: name, // Giả sử name là username
+      username,
       email,
       password,
     });
-    // Bạn có thể tự động đăng nhập họ sau khi đăng ký hoặc điều hướng đến trang login
   };
 
+  // Hàm Đăng xuất
   const logout = () => {
     localStorage.removeItem('jwtToken');
     setUser(null);
     setToken(null);
-    // Điều hướng về trang chủ
-    window.location.href = '/'; 
+    delete apiClient.defaults.headers.common['Authorization'];
+    window.location.href = '/login'; 
   };
 
+  // Cung cấp các giá trị này cho toàn bộ ứng dụng
   return (
     <AuthContext.Provider value={{ user, token, isLoading, login, register, logout }}>
       {!isLoading && children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+} // <-- Đảm bảo không có dấu ngoặc thừa ở dây
