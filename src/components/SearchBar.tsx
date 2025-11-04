@@ -1,22 +1,34 @@
+// src/components/SearchBar.tsx
 import { Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react'; // <-- THÊM: useEffect
 
 interface SearchBarProps {
   placeholder?: string;
   onSearch?: (query: string) => void;
   className?: string;
+  initialValue?: string; // <-- THÊM MỚI
 }
 
 export default function SearchBar({
   placeholder = "Search movies, dishes, or ingredients...",
   onSearch,
-  className = ""
+  className = "",
+  initialValue = "" // <-- THÊM MỚI
 }: SearchBarProps) {
-  const [query, setQuery] = useState('');
+  // SỬA: Dùng initialValue để set giá trị ban đầu
+  const [query, setQuery] = useState(initialValue);
+
+  // --- THÊM MỚI: Tự động focus vào thanh search khi nó xuất hiện ---
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    // Tự động focus, đặc biệt hữu ích cho modal
+    inputRef.current?.focus();
+  }, []);
+  // -------------------------------------------------------------
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSearch && query.trim()) {
+    if (onSearch) { // Cho phép search cả khi chuỗi rỗng (để xóa filter)
       onSearch(query);
     }
   };
@@ -24,6 +36,7 @@ export default function SearchBar({
   return (
     <form onSubmit={handleSubmit} className={`relative ${className}`}>
       <input
+        ref={inputRef} // <-- THÊM MỚI
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}

@@ -1,4 +1,6 @@
-import { useState } from 'react';
+// src/pages/Browse.tsx
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom'; 
 import { Filter, SlidersHorizontal, X } from 'lucide-react';
 import RecipeCard from '../components/RecipeCard';
 import SearchBar from '../components/SearchBar';
@@ -12,6 +14,11 @@ export default function Browse() {
     cuisine: [] as string[],
     dietary: [] as string[],
   });
+
+  // --- Lấy tham số từ URL ---
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  // -------------------------
 
   const recipes = [
     {
@@ -106,6 +113,22 @@ export default function Browse() {
     },
   ];
 
+  // --- Cập nhật state khi URL thay đổi ---
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
+  // ------------------------------------
+
+  // --- Hàm xử lý tìm kiếm trên trang Browse ---
+  const handleBrowseSearch = (query: string) => {
+    setSearchQuery(query);
+    // Cập nhật URL mà không reload trang
+    setSearchParams(query ? { q: query } : {});
+    // TODO: Gọi API fetch công thức với query mới
+    console.log("Đang tìm kiếm:", query);
+  };
+  // -----------------------------------------
+
   const toggleFilter = (category: keyof typeof filters, value: string) => {
     if (category === 'cookingTime') {
       setFilters({ ...filters, [category]: filters[category] === value ? '' : value });
@@ -128,7 +151,17 @@ export default function Browse() {
           <p className="text-gray-400">Explore dishes from your favorite movies</p>
         </div>
 
-        <SearchBar className="mb-8" />
+        {/* --- SỬA ĐỔI: Kết nối SearchBar với state --- */}
+        <div className="mb-8">
+          <SearchBar 
+            onSearch={handleBrowseSearch}
+            // `key` rất quan trọng để React "reset" component khi query từ URL thay đổi
+            key={searchQuery} 
+            initialValue={searchQuery} // Thêm prop initialValue
+            placeholder="Tìm theo phim, món ăn, hoặc nguyên liệu..."
+          />
+        </div>
+        {/* ------------------------------------------- */}
 
         <div className="flex flex-col lg:flex-row gap-8">
           <aside className={`lg:w-64 ${showFilters ? 'block' : 'hidden lg:block'}`}>
