@@ -105,36 +105,52 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category }) => {
       onMouseLeave={handleMouseLeave}
     >
       <div
-        className="relative w-full h-full rounded-2xl shadow-xl transition-all duration-500 ease-out [transform-style:preserve-3d] 
+        className="relative w-full h-full rounded-xl shadow-xl transition-all duration-500 ease-out 
+                   [transform-style:preserve-3d] 
                    md:group-hover/card:shadow-2xl md:group-hover/card:shadow-amber-500/20"
         style={{ transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg)` }}
       >
-        {/* Image with enhanced zoom */}
+        {/* Image with zoom */}
         <img 
           src={category.imageUrl} 
           alt={category.name} 
-          className="absolute inset-0 w-full h-full object-cover rounded-2xl transition-transform duration-700 ease-out md:group-hover/card:scale-115 brightness-90 md:group-hover/card:brightness-100" 
+          className="absolute inset-0 w-full h-full object-cover rounded-xl 
+                     transition-transform duration-700 ease-out 
+                     md:group-hover/card:scale-110 brightness-75 md:group-hover/card:brightness-90" 
         />
         
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-t from-black/90 via-black/40 to-transparent rounded-2xl"></div>
+        {/* Gradient overlay - Cinema style */}
+        <div className="absolute inset-0 w-full h-full 
+                        bg-gradient-to-t from-black via-black/50 to-transparent rounded-xl"></div>
+        
+        {/* Spotlight effect */}
+        <div className="absolute inset-0 w-full h-full rounded-xl 
+                        bg-gradient-to-b from-amber-500/10 via-transparent to-transparent"></div>
         
         {/* Shine effect on hover */}
-        <div className="absolute inset-0 w-full h-full rounded-2xl opacity-0 md:group-hover/card:opacity-100 transition-opacity duration-500 bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
+        <div className="absolute inset-0 w-full h-full rounded-xl opacity-0 
+                        md:group-hover/card:opacity-100 transition-opacity duration-500 
+                        bg-gradient-to-br from-white/10 via-transparent to-transparent"></div>
         
         {/* Content */}
-        <div className="absolute inset-0 flex flex-col justify-end p-6 text-white [transform:translateZ(60px)]">
-          <h3 className="text-3xl font-bold tracking-tight drop-shadow-2xl mb-1 transform transition-transform duration-300 md:group-hover/card:translate-y-[-4px]">
+        <div className="absolute inset-0 flex flex-col justify-end p-6 text-white 
+                        [transform:translateZ(60px)]">
+          <h3 className="text-3xl font-bold tracking-tight drop-shadow-2xl mb-1 
+                         transform transition-transform duration-300 
+                         md:group-hover/card:translate-y-[-4px]">
             {category.name}
           </h3>
-          <p className="text-base text-gray-200 opacity-100 md:opacity-0 md:group-hover/card:opacity-100 transition-all duration-300 ease-in-out drop-shadow-lg transform md:group-hover/card:translate-y-[-2px]">
+          <p className="text-base text-gray-300 opacity-100 md:opacity-0 
+                        md:group-hover/card:opacity-100 transition-all duration-300 ease-in-out 
+                        drop-shadow-lg transform md:group-hover/card:translate-y-[-2px]">
             {category.description}
           </p>
         </div>
         
         {/* Border glow effect */}
-        <div className="absolute inset-0 w-full h-full rounded-2xl border-2 border-transparent 
-                      md:group-hover/card:border-amber-500/50 transition-all duration-300 ease-out [transform:translateZ(20px)]"></div>
+        <div className="absolute inset-0 w-full h-full rounded-xl border border-transparent 
+                        md:group-hover/card:border-amber-500/50 transition-all duration-300 ease-out 
+                        [transform:translateZ(20px)]"></div>
       </div>
     </div>
   );
@@ -187,34 +203,60 @@ const CategoryShowcase: React.FC = () => {
         }
       `}</style>
 
-      <section className="py-24 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
-        {/* Background decorative elements */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-red-500/10 rounded-full blur-3xl"></div>
+      <section className="relative py-20 sm:py-24 bg-black overflow-hidden">
+        {/* Background Effects */}
+        <div className="absolute inset-0">
+          {/* Spotlight */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full 
+                          bg-gradient-to-b from-amber-500/5 via-transparent to-transparent"></div>
+          {/* Kitchen texture */}
+          <div className="absolute inset-0 opacity-[0.02]" 
+               style={{
+                 backgroundImage: 'repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 40px)',
+                 backgroundSize: '100% 40px'
+               }}></div>
         </div>
+
+        {/* Film strip decorations */}
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-30"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-30"></div>
 
         <div className="relative z-10">
           {/* Header section */}
-          <div className="text-center mb-20 px-4">
-            <h2 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 bg-clip-text text-transparent">
-              Khám Phá Theo Chủ Đề
+          <div className="text-center mb-16 sm:mb-20 px-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 
+                            bg-zinc-900/50 backdrop-blur-sm rounded-full 
+                            border border-zinc-800 mb-6">
+              <Utensils className="w-4 h-4 text-amber-500" />
+              <span className="text-sm font-medium text-gray-400 tracking-wider uppercase">
+                Categories
+              </span>
+              <Film className="w-4 h-4 text-amber-500" />
+            </div>
+            
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white">
+              Khám Phá Theo <span className="text-amber-500">Chủ Đề</span>
             </h2>
-            <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
-              Lướt qua các thể loại món ăn và phim ảnh để tìm nguồn cảm hứng tiếp theo cho bạn.
+            <p className="text-base sm:text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              Lướt qua các thể loại món ăn và phim ảnh để tìm nguồn cảm hứng tiếp theo cho bạn
             </p>
           </div>
           
-          <div className="flex flex-col gap-16">
+          <div className="flex flex-col gap-12 sm:gap-16">
             {/* Food Categories */}
             <div>
-              <div className="flex items-center gap-4 mb-8 pl-4 md:pl-8">
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                  <Utensils className="w-6 h-6 text-amber-400" />
+              <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8 pl-4 md:pl-8">
+                <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 
+                                rounded-lg bg-amber-500/10 border border-amber-500/30">
+                  <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
                 </div>
                 <div>
-                  <h3 className="text-3xl font-bold text-white">Thể Loại Món Ăn</h3>
-                  <p className="text-sm text-gray-500 mt-1">Khám phá ẩm thực thế giới</p>
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white">
+                    Thể Loại Món Ăn
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    Khám phá ẩm thực thế giới
+                  </p>
                 </div>
               </div>
               <CategoryScroller categories={FOOD_CATEGORIES} direction="left" />
@@ -222,13 +264,18 @@ const CategoryShowcase: React.FC = () => {
             
             {/* Movie Categories */}
             <div>
-              <div className="flex items-center justify-end gap-4 mb-8 pr-4 md:pr-8">
-                <div>
-                  <h3 className="text-3xl font-bold text-white text-right">Thể Loại Phim</h3>
-                  <p className="text-sm text-gray-500 mt-1 text-right">Trải nghiệm điện ảnh đa dạng</p>
+              <div className="flex items-center justify-end gap-3 sm:gap-4 mb-6 sm:mb-8 pr-4 md:pr-8">
+                <div className="text-right">
+                  <h3 className="text-2xl sm:text-3xl font-bold text-white">
+                    Thể Loại Phim
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    Trải nghiệm điện ảnh đa dạng
+                  </p>
                 </div>
-                <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20">
-                  <Film className="w-6 h-6 text-red-400" />
+                <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 
+                                rounded-lg bg-amber-500/10 border border-amber-500/30">
+                  <Film className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
                 </div>
               </div>
               <CategoryScroller categories={MOVIE_CATEGORIES} direction="right" />
