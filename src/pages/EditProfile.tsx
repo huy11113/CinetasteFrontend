@@ -1,6 +1,8 @@
+// src/pages/EditProfile.tsx
 import { useState } from 'react';
 import { Camera, User, MapPin, Link as LinkIcon, Save, X } from 'lucide-react';
 import Button from '../components/Button';
+import ThemeSwitcher from '../components/ThemeSwitcher'; // THÊM MỚI
 
 export default function EditProfile() {
   const [formData, setFormData] = useState({
@@ -148,6 +150,9 @@ export default function EditProfile() {
               </div>
             </div>
           </div>
+
+          {/* THÊM MỚI: Theme Switcher */}
+          <ThemeSwitcher />
 
           <div className="bg-cinematic-gray rounded-xl border border-gray-800 p-6">
             <h3 className="text-xl font-semibold text-white mb-4">Taste Preferences</h3>

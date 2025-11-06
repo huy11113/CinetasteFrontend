@@ -4,40 +4,169 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   CINEMA THEME (Default - Dark)
+   ============================================ */
+:root, .theme-cinema {
+  /* Background colors */
+  --bg-darker: #050505;
+  --bg-dark: #0a0a0a;
+  --bg-gray: #1a1a1a;
+  --bg-gray-light: #2a2a2a;
+  
+  /* Accent colors */
+  --accent: #ff6b6b;
+  --accent-light: #ff8787;
+  --accent-dark: #ff5252;
+  
+  /* Gold colors */
+  --gold: #ffd700;
+  --gold-light: #ffe44d;
+  
+  /* Text colors */
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  
+  /* Border colors */
+  --border-default: #374151;
+  --border-light: #4b5563;
+  
+  /* Shadow colors */
+  --shadow-glow: rgba(255, 107, 107, 0.3);
+}
+
+/* ============================================
+   KITCHEN THEME (Warm & Cozy)
+   ============================================ */
+.theme-kitchen {
+  /* Background colors - Màu ấm áp nhà bếp */
+  --bg-darker: #2c1810;
+  --bg-dark: #3d2314;
+  --bg-gray: #4a2c1a;
+  --bg-gray-light: #5a3522;
+  
+  /* Accent colors - Cam ấm áp */
+  --accent: #ff8c42;
+  --accent-light: #ffa563;
+  --accent-dark: #ff7321;
+  
+  /* Gold colors - Vàng mơ/vàng bơ */
+  --gold: #f4a460;
+  --gold-light: #f5c084;
+  
+  /* Text colors */
+  --text-primary: #fdf6e3;
+  --text-secondary: #e5d5c0;
+  --text-muted: #c4b49a;
+  
+  /* Border colors */
+  --border-default: #6d4c3d;
+  --border-light: #8b6649;
+  
+  /* Shadow colors */
+  --shadow-glow: rgba(255, 140, 66, 0.3);
+}
+
+/* ============================================
+   GLOBAL STYLES
+   ============================================ */
 @layer base {
   body {
-    @apply bg-cinematic-darker text-gray-100 font-sans;
+    background-color: var(--bg-darker);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Smooth transition cho tất cả background & border */
+  * {
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.3s;
+    transition-timing-function: ease;
   }
 }
 
+/* ============================================
+   COMPONENT STYLES (Sử dụng CSS Variables)
+   ============================================ */
 @layer components {
   .btn-primary {
-    @apply px-6 py-3 bg-cinematic-accent text-white font-medium rounded-lg
-           hover:bg-cinematic-accent-light transition-all duration-300
-           hover:shadow-glow-red transform hover:scale-105;
+    @apply px-6 py-3 font-medium rounded-lg
+           hover:shadow-lg transform hover:scale-105;
+    background-color: var(--accent);
+    color: white;
+    box-shadow: 0 0 20px var(--shadow-glow);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--accent-light);
   }
 
   .btn-secondary {
-    @apply px-6 py-3 bg-cinematic-gray-light text-white font-medium rounded-lg
-           hover:bg-cinematic-gray border border-gray-700 transition-all duration-300;
+    @apply px-6 py-3 font-medium rounded-lg;
+    background-color: var(--bg-gray-light);
+    color: var(--text-primary);
+    border: 1px solid var(--border-default);
+  }
+
+  .btn-secondary:hover {
+    background-color: var(--bg-gray);
   }
 
   .card {
-    @apply bg-cinematic-gray rounded-xl overflow-hidden border border-gray-800
-           hover:border-cinematic-accent transition-all duration-300
-           hover:shadow-glow-red cursor-pointer;
+    @apply rounded-xl overflow-hidden cursor-pointer;
+    background-color: var(--bg-gray);
+    border: 1px solid var(--border-default);
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--shadow-glow);
   }
 
   .input-field {
-    @apply w-full px-4 py-3 bg-cinematic-gray-light border border-gray-700
-           rounded-lg text-white placeholder-gray-500
-           focus:outline-none focus:border-cinematic-accent focus:ring-2
-           focus:ring-cinematic-accent/50 transition-all duration-300;
+    @apply w-full px-4 py-3 rounded-lg;
+    background-color: var(--bg-gray-light);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+  }
+  
+  .input-field::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input-field:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--shadow-glow);
   }
 
   .section-title {
-    @apply text-4xl md:text-5xl font-display font-bold mb-6
-           bg-gradient-to-r from-cinematic-gold to-cinematic-accent
-           bg-clip-text text-transparent;
+    @apply text-4xl md:text-5xl font-display font-bold mb-6;
+    background: linear-gradient(to right, var(--gold), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
+}
+
+/* ============================================
+   UTILITY CLASSES với CSS Variables
+   ============================================ */
+@layer utilities {
+  .bg-cinematic-darker { background-color: var(--bg-darker); }
+  .bg-cinematic-dark { background-color: var(--bg-dark); }
+  .bg-cinematic-gray { background-color: var(--bg-gray); }
+  .bg-cinematic-gray-light { background-color: var(--bg-gray-light); }
+  
+  .text-cinematic-accent { color: var(--accent); }
+  .text-cinematic-accent-light { color: var(--accent-light); }
+  .text-cinematic-gold { color: var(--gold); }
+  .text-cinematic-gold-light { color: var(--gold-light); }
+  
+  .border-cinematic-accent { border-color: var(--accent); }
+  .border-gray-700 { border-color: var(--border-default); }
+  .border-gray-800 { border-color: var(--border-default); }
+  
+  .shadow-glow-red { box-shadow: 0 0 20px var(--shadow-glow); }
 }

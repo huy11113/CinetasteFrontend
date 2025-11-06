@@ -3,12 +3,15 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-import { AuthProvider } from './contexts/AuthContext.tsx'; // <-- Import
+import { AuthProvider } from './contexts/AuthContext.tsx';
+import { ThemeProvider } from './contexts/ThemeContext.tsx'; // THÊM MỚI
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <AuthProvider> {/* <-- Bọc ứng dụng */}
-      <App />
-    </AuthProvider>
+    <ThemeProvider> {/* THÊM MỚI - Bọc ngoài cùng */}
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </ThemeProvider>
   </StrictMode>
 );
