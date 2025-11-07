@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Settings, Users, Award, BookOpen, Heart, Calendar, MapPin } from 'lucide-react';
-import RecipeCard from '../components/RecipeCard';
-import Button from '../components/Button';
+import RecipeCard from '../components/ui/RecipeCard';
+import Button from '../components/ui/Button';
 
 export default function Profile() {
   const [activeTab, setActiveTab] = useState<'recipes' | 'favorites' | 'achievements'>('recipes');

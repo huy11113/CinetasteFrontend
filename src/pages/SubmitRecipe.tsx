@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, X, Image as ImageIcon, Film, Clock, ChefHat, Users, Sparkles, Save } from 'lucide-react';
-import Button from '../components/Button';
+import Button from '../components/ui/Button';
 
 export default function SubmitRecipe() {
   const [formData, setFormData] = useState({

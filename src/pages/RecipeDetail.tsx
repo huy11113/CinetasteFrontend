@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Clock, ChefHat, Star, Users, Bookmark, Share2, Film, Sparkles, MessageCircle, ThumbsUp } from 'lucide-react';
-import Button from '../components/Button';
+import Button from '../components/ui/Button';
 
 export default function RecipeDetail() {
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions' | 'nutrition'>('ingredients');

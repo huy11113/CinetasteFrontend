@@ -8,14 +8,15 @@ import {
   X,
   LogOut,
   Heart,
-  Bell
+  Bell,
+  ChefHat  // <-- THÊM ICON MỚI
 } from 'lucide-react';
-// THÊM: useNavigate
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth';
 import Button from './Button';
-import { type User } from '../contexts/AuthContext';
-import SearchBar from './SearchBar'; // <-- THÊM: Import SearchBar
+import { type User } from '../../contexts/AuthContext';
+import SearchBar from './SearchBar';
+import ThemeToggleButton from '../ThemeToggleButton'; // <-- IMPORT COMPONENT MỚI
 
 // --- COMPONENT AVATAR (Dùng để hiển thị ảnh hoặc chữ cái) ---
 const Avatar = ({ user }: { user: User }) => {
@@ -238,57 +239,68 @@ export default function Navbar() {
                           </button>
 
                           {/* Dropdown Profile */}
-                          {isProfileOpen && (
-                            <div className="absolute right-0 top-12 mt-2 w-64 bg-cinematic-gray rounded-lg shadow-lg border border-gray-700 py-2 z-50 animate-slideDown origin-top-right">
-                              <div className="px-4 py-3 border-b border-gray-700 flex items-center space-x-3">
-                                <div className="flex-shrink-0">
-                                  <Avatar user={user} />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-semibold text-white truncate" title={user.displayName || user.username}>
-                                    {user.displayName || user.username}
-                                  </p>
-                                  <p className="text-xs text-gray-400 truncate" title={`@${user.username}`}>
-                                    @{user.username}
-                                  </p>
-                                </div>
-                              </div>
-                              
-                              <div className="p-2 space-y-1">
-                                <Link 
-                                  to="/profile" 
-                                  className={dropdownLinkClass}
-                                  onClick={() => setIsProfileOpen(false)}
-                                >
-                                  <UserIcon className="w-4 h-4 mr-3 text-gray-400" />
-                                  Hồ sơ của tôi
-                                </Link>
-                                
-                                {/* --- THÊM MỚI: MỤC YÊU THÍCH --- */}
-                                <Link 
-                                  to="/profile/favorites" // Bạn cần tạo route này trong Router.tsx
-                                  className={dropdownLinkClass}
-                                  onClick={() => setIsProfileOpen(false)}
-                                >
-                                  <Heart className="w-4 h-4 mr-3 text-gray-400" />
-                                  Công thức yêu thích
-                                </Link>
-                                
-                                <div className="border-t border-gray-700 my-1 !mt-2 !mb-1"></div>
+{isProfileOpen && (
+  <div className="absolute right-0 top-12 mt-2 w-64 bg-cinematic-gray rounded-lg 
+                  shadow-lg border border-gray-700 py-2 z-50 animate-slideDown origin-top-right">
+    
+    {/* Header với avatar và tên */}
+    <div className="px-4 py-3 border-b border-gray-700 flex items-center space-x-3">
+      <div className="flex-shrink-0">
+        <Avatar user={user} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-white truncate">
+          {user.displayName || user.username}
+        </p>
+        <p className="text-xs text-gray-400 truncate">
+          @{user.username}
+        </p>
+      </div>
+    </div>
+    
+    {/* Menu items */}
+    <div className="p-2 space-y-1">
+      {/* Link đến profile */}
+      <Link 
+        to="/profile" 
+        className={dropdownLinkClass}
+        onClick={() => setIsProfileOpen(false)}
+      >
+        <UserIcon className="w-4 h-4 mr-3 text-gray-400" />
+        Hồ sơ của tôi
+      </Link>
+      
+      {/* Link đến favorites */}
+      <Link 
+        to="/profile/favorites"
+        className={dropdownLinkClass}
+        onClick={() => setIsProfileOpen(false)}
+      >
+        <Heart className="w-4 h-4 mr-3 text-gray-400" />
+        Công thức yêu thích
+      </Link>
+      
+      {/* ===== THÊM NÚT CHUYỂN THEME Ở ĐÂY ===== */}
+      <ThemeToggleButton />
+      {/* ======================================== */}
+      
+      {/* Divider */}
+      <div className="border-t border-gray-700 my-1 !mt-2 !mb-1"></div>
 
-                                <button
-                                  onClick={() => {
-                                    logout();
-                                    setIsProfileOpen(false);
-                                  }}
-                                  className={`${dropdownLinkClass} text-cinematic-accent hover:!text-cinematic-accent-light`}
-                                >
-                                  <LogOut className="w-4 h-4 mr-3" />
-                                  Đăng xuất
-                                </button>
-                              </div>
-                            </div>
-                          )}
+      {/* Nút logout */}
+      <button
+        onClick={() => {
+          logout();
+          setIsProfileOpen(false);
+        }}
+        className={`${dropdownLinkClass} text-cinematic-accent hover:!text-cinematic-accent-light`}
+      >
+        <LogOut className="w-4 h-4 mr-3" />
+        Đăng xuất
+      </button>
+    </div>
+  </div>
+)}
                         </div>
                       </>
                     ) : (

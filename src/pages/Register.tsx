@@ -1,7 +1,7 @@
 // src/pages/Register.tsx
 import { useState } from 'react';
 import { Film, Mail, Lock, User, Eye, EyeOff, CheckCircle, XCircle } from 'lucide-react';
-import Button from '../components/Button';
+import Button from '../components/ui/Button';
 import { useAuth } from '../hooks/useAuth'; // Import hook
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios'; // Import axios để kiểm tra lỗi

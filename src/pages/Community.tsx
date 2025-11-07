@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Heart, MessageCircle, Share2, Bookmark, Trophy, TrendingUp, Users } from 'lucide-react';
-import Button from '../components/Button';
+import Button from '../components/ui/Button';
 
 export default function Community() {
   const [activeFilter, setActiveFilter] = useState<'newest' | 'popular' | 'following'>('newest');

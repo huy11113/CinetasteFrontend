@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Star, Clock, Users, Bookmark, Flame, ChevronRight, ChevronLeft, Film, TrendingUp, ChefHat } from "lucide-react";
 import { type Recipe } from '../../types';
-import Button from '../Button';
+import Button from '../ui/Button';
 import apiClient from '../../services/apiClient';
 
 // --- HÀM HELPER ---

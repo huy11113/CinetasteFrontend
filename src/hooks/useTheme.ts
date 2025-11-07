@@ -5,6 +5,7 @@ import { ThemeContext } from '../contexts/ThemeContext';
 export function useTheme() {
   const context = useContext(ThemeContext);
   
+  // Đảm bảo hook được dùng trong ThemeProvider
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }

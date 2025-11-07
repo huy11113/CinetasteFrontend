@@ -1,6 +1,6 @@
 // src/components/home/AIFeaturette.tsx
 import { Sparkles, ArrowRight, Camera } from 'lucide-react';
-import Button from '../Button';
+import Button from '../ui/Button';
 
 export default function AIFeaturette() {
   return (

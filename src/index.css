@@ -40,32 +40,54 @@
    KITCHEN THEME (Warm & Cozy)
    ============================================ */
 .theme-kitchen {
-  /* Background colors - Màu ấm áp nhà bếp */
-  --bg-darker: #2c1810;
-  --bg-dark: #3d2314;
-  --bg-gray: #4a2c1a;
-  --bg-gray-light: #5a3522;
+  /* ===== BACKGROUND COLORS ===== */
+  /* Màu nền tối nhất - dùng cho body, sections */
+  --bg-darker: #f5f1e8;  /* Kem nhạt */
   
-  /* Accent colors - Cam ấm áp */
-  --accent: #ff8c42;
-  --accent-light: #ffa563;
-  --accent-dark: #ff7321;
+  /* Màu nền chính - dùng cho containers */
+  --bg-dark: #faf7f0;    /* Kem sáng hơn */
   
-  /* Gold colors - Vàng mơ/vàng bơ */
-  --gold: #f4a460;
-  --gold-light: #f5c084;
+  /* Màu nền cho cards, boxes */
+  --bg-gray: #ffffff;     /* Trắng tinh */
   
-  /* Text colors */
-  --text-primary: #fdf6e3;
-  --text-secondary: #e5d5c0;
-  --text-muted: #c4b49a;
+  /* Màu nền hover, highlights */
+  --bg-gray-light: #fff9f0; /* Vàng kem rất nhạt */
   
-  /* Border colors */
-  --border-default: #6d4c3d;
-  --border-light: #8b6649;
+  /* ===== ACCENT COLORS ===== */
+  /* Màu nhấn chính - buttons, links, highlights */
+  --accent: #d97948;      /* Cam terracotta */
   
-  /* Shadow colors */
-  --shadow-glow: rgba(255, 140, 66, 0.3);
+  /* Màu nhấn sáng - hover states */
+  --accent-light: #e89565; /* Cam sáng hơn */
+  
+  /* Màu nhấn tối - active states */
+  --accent-dark: #c76635;  /* Cam đậm */
+  
+  /* ===== GOLD COLORS ===== */
+  /* Màu vàng cho icons, badges */
+  --gold: #c9a868;        /* Vàng mơ */
+  --gold-light: #ddbf7e;  /* Vàng sáng */
+  
+  /* ===== TEXT COLORS ===== */
+  /* Text chính - headings, important text */
+  --text-primary: #3e2723;   /* Nâu đậm (dễ đọc trên nền sáng) */
+  
+  /* Text phụ - paragraphs, descriptions */
+  --text-secondary: #5d4037; /* Nâu vừa */
+  
+  /* Text mờ - hints, placeholders */
+  --text-muted: #8d6e63;     /* Nâu nhạt */
+  
+  /* ===== BORDER COLORS ===== */
+  /* Border mặc định */
+  --border-default: #d7ccc8; /* Nâu sáng */
+  
+  /* Border hover/focus */
+  --border-light: #bcaaa4;   /* Nâu đậm hơn */
+  
+  /* ===== SHADOW COLORS ===== */
+  /* Shadow cho buttons, cards khi hover */
+  --shadow-glow: rgba(217, 121, 72, 0.25); /* Cam trong suốt */
 }
 
 /* ============================================

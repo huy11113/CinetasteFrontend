@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Upload, Image as ImageIcon, Sparkles, Check, ArrowRight, Film } from 'lucide-react';
-import Button from '../components/Button';
-import RecipeCard from '../components/RecipeCard';
+import Button from '../components/ui/Button';
+import RecipeCard from '../components/ui/RecipeCard';
 
 export default function SceneToRecipe() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);

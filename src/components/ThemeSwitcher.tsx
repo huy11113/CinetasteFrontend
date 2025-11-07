@@ -7,6 +7,7 @@ export default function ThemeSwitcher() {
 
   return (
     <div className="bg-cinematic-gray rounded-xl border border-gray-800 p-6">
+      {/* Header */}
       <h3 className="text-xl font-semibold text-white mb-4">
         Giao diện trang web
       </h3>
@@ -14,18 +15,24 @@ export default function ThemeSwitcher() {
         Chọn phong cách hiển thị phù hợp với bạn
       </p>
 
+      {/* Grid 2 theme cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Cinema Theme */}
+        
+        {/* ===== CINEMA DARK THEME CARD ===== */}
         <button
           onClick={() => theme === 'kitchen' && toggleTheme()}
-          className={`relative p-4 rounded-lg border-2 transition-all ${
+          className={`relative p-4 rounded-lg border-2 transition-all text-left ${
             theme === 'cinema'
-              ? 'border-cinematic-accent bg-cinematic-accent/10'
-              : 'border-gray-700 hover:border-gray-600'
+              ? 'border-cinematic-accent bg-cinematic-accent/10'  // Active state
+              : 'border-gray-700 hover:border-gray-600'           // Inactive state
           }`}
         >
+          {/* Icon và badge "Đang dùng" */}
           <div className="flex items-center justify-between mb-3">
-            <Film className="w-6 h-6 text-cinematic-accent" />
+            <div className="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/30 
+                            flex items-center justify-center">
+              <Film className="w-5 h-5 text-red-500" />
+            </div>
             {theme === 'cinema' && (
               <span className="px-2 py-1 bg-cinematic-accent text-white text-xs rounded-full font-semibold">
                 Đang dùng
@@ -33,12 +40,13 @@ export default function ThemeSwitcher() {
             )}
           </div>
           
+          {/* Title và description */}
           <h4 className="text-white font-semibold mb-1">Cinema Dark</h4>
           <p className="text-gray-400 text-sm">
             Phong cách rạp chiếu phim - tối màu, hiện đại
           </p>
 
-          {/* Preview */}
+          {/* Preview thumbnail */}
           <div className="mt-4 rounded-lg overflow-hidden border border-gray-700">
             <div className="h-16 bg-black"></div>
             <div className="bg-zinc-900 p-2 space-y-1">
@@ -48,17 +56,21 @@ export default function ThemeSwitcher() {
           </div>
         </button>
 
-        {/* Kitchen Theme */}
+        {/* ===== KITCHEN WARM THEME CARD ===== */}
         <button
           onClick={() => theme === 'cinema' && toggleTheme()}
-          className={`relative p-4 rounded-lg border-2 transition-all ${
+          className={`relative p-4 rounded-lg border-2 transition-all text-left ${
             theme === 'kitchen'
               ? 'border-cinematic-accent bg-cinematic-accent/10'
               : 'border-gray-700 hover:border-gray-600'
           }`}
         >
+          {/* Icon và badge */}
           <div className="flex items-center justify-between mb-3">
-            <ChefHat className="w-6 h-6 text-orange-400" />
+            <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 
+                            flex items-center justify-center">
+              <ChefHat className="w-5 h-5 text-amber-500" />
+            </div>
             {theme === 'kitchen' && (
               <span className="px-2 py-1 bg-cinematic-accent text-white text-xs rounded-full font-semibold">
                 Đang dùng
@@ -66,22 +78,24 @@ export default function ThemeSwitcher() {
             )}
           </div>
           
+          {/* Title và description */}
           <h4 className="text-white font-semibold mb-1">Warm Kitchen</h4>
           <p className="text-gray-400 text-sm">
             Gam màu kem & terracotta - ấm cúng như nhà bếp
           </p>
 
-          {/* Preview */}
+          {/* Preview thumbnail - Màu sáng */}
           <div className="mt-4 rounded-lg overflow-hidden border border-gray-700">
-            <div className="h-16 bg-gradient-to-br from-amber-900 to-stone-800"></div>
-            <div className="bg-stone-900 p-2 space-y-1">
+            <div className="h-16 bg-gradient-to-br from-amber-100 to-orange-100"></div>
+            <div className="bg-amber-50 p-2 space-y-1">
               <div className="h-2 bg-orange-500 rounded w-3/4"></div>
-              <div className="h-2 bg-amber-600 rounded w-1/2"></div>
+              <div className="h-2 bg-amber-400 rounded w-1/2"></div>
             </div>
           </div>
         </button>
       </div>
 
+      {/* Info box */}
       <div className="mt-4 p-4 bg-cinematic-gray-light rounded-lg">
         <p className="text-gray-400 text-sm">
           💡 <strong>Mẹo:</strong> Cài đặt sẽ được lưu tự động và áp dụng mỗi khi bạn truy cập lại trang web.

@@ -1,7 +1,7 @@
 // src/pages/EditProfile.tsx
 import { useState } from 'react';
 import { Camera, User, MapPin, Link as LinkIcon, Save, X } from 'lucide-react';
-import Button from '../components/Button';
+import Button from '../components/ui/Button';
 import ThemeSwitcher from '../components/ThemeSwitcher'; // THÊM MỚI
 
 export default function EditProfile() {

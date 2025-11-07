@@ -1,5 +1,5 @@
 // src/components/home/CommunityCTA.tsx
-import Button from '../Button';
+import Button from '../ui/Button';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Users, ChefHat, Film, ArrowRight, Sparkles, Star, TrendingUp } from 'lucide-react';
