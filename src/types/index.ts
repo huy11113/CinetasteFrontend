@@ -1,22 +1,73 @@
 // src/types/index.ts
 export type RecipeDifficulty = 'Easy' | 'Medium' | 'Hard';
 
-// Kiểu dữ liệu này khớp với RecipeResponse.java từ backend của bạn
+// (Recipe - Dạng tóm tắt cho trang Browse - giữ nguyên)
 export interface Recipe {
   id: string;
-  authorId: string; // Thêm
+  authorId: string;
   title: string;
-  slug: string; // Thêm
-  summary: string; // Thêm
+  slug: string;
+  summary: string;
   mainImageUrl: string;
   prepTimeMinutes: number;
   cookTimeMinutes: number;
-  difficulty: number; // Backend gửi 1 (Easy), 2 (Medium), 3 (Hard)
-  servings: number; // Thêm
+  difficulty: number;
+  servings: number;
   avgRating: number;
-  createdAt: string; // Thêm (Instant được gửi dưới dạng string)
+  createdAt: string;
+  movieTitle: string;
+  ratingsCount: number;
+}
 
-  // === CÁC TRƯỜNG ĐÃ SỬA ===
-  movieTitle: string; // (Giờ đã có từ backend)
-  ratingsCount: number; // (Giờ đã có từ backend)
+// --- THÊM CÁC INTERFACE MỚI CHO TRANG CHI TIẾT ---
+
+// Khớp với RecipeStepDto.java
+export interface RecipeStep {
+  step: number;
+  title: string;
+  description: string;
+  imageUrl: string | null;
+}
+
+// Khớp với RecipeIngredientDto.java
+export interface RecipeIngredient {
+  name: string;
+  quantityUnit: string;
+  isOptional: boolean;
+}
+
+// Khớp với AuthorDto
+export interface RecipeAuthor {
+  id: string;
+  name: string;
+  avatarUrl: string;
+}
+
+// Khớp với MovieDto
+export interface RecipeMovie {
+  title: string;
+  year: number | null;
+  posterUrl: string | null;
+}
+
+// Khớp với RecipeDetailResponse.java
+export interface RecipeDetail {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string; // Đây là 'description' trong file cũ
+  difficulty: number;
+  prepTimeMinutes: number;
+  cookTimeMinutes: number;
+  servings: number;
+  mainImageUrl: string;
+  avgRating: number;
+  ratingsCount: number;
+  createdAt: string;
+  
+  ingredients: RecipeIngredient[];
+  instructions: RecipeStep[];
+  nutrition: Record<string, string>; // Dùng Record<string, string> cho Map
+  author: RecipeAuthor;
+  movie: RecipeMovie | null;
 }
