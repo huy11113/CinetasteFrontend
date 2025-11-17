@@ -8,7 +8,7 @@ import Browse from '../pages/Browse';
 import RecipeDetail from '../pages/RecipeDetail';
 import Profile from '../pages/Profile';
 import EditProfile from '../pages/EditProfile';
-import SceneToRecipe from '../pages/SceneToRecipe';
+import SceneToRecipe from '../pages/AIStudio';
 import Community from '../pages/Community';
 import SubmitRecipe from '../pages/SubmitRecipe';
 
