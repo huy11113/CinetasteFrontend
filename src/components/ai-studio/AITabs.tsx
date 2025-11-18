@@ -47,15 +47,8 @@ export default function AITabs({ activeTab, onChange }: AITabsProps) {
         ))}
       </div>
 
-      {/* Coming Soon Tabs */}
-      <div className="flex gap-3 opacity-50 grayscale hover:grayscale-0 transition-all">
-        {futureTabs.map(tab => (
-          <div key={tab.id} className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-dashed border-gray-700 text-xs text-gray-500 cursor-not-allowed">
-            <tab.icon className="w-3 h-3" />
-            <span>{tab.label} (Sắp ra mắt)</span>
-          </div>
-        ))}
-      </div>
+   
+     
     </div>
   );
 }

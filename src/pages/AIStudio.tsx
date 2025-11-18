@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import AIHero from '../components/ai-studio/AIHero'; // Bạn có thể tách Header ra nếu muốn, hoặc để inline
+
 import AITabs from '../components/ai-studio/AITabs';
-import AnalyzeDish from '../components/ai-studio/AnalyzeDish';
+import AnalyzeDish from '../components/ai-studio/analyze/AnalyzeDish';
 import CreativeChef from '../components/ai-studio/CreativeChef';
 import ChefChat from '../components/ai-studio/ChefChat';
 import KitchenMentor from '../components/ai-studio/KitchenMentor';

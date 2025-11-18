@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Wand2, ChefHat, Flame, Clock, Leaf } from 'lucide-react';
+import { Wand2, ChefHat, Flame, Clock, Leaf, Loader2 } from 'lucide-react';
 import Button from '../ui/Button';
 
 export default function CreativeChef() {
