@@ -192,3 +192,75 @@
   
   .shadow-glow-red { box-shadow: 0 0 20px var(--shadow-glow); }
 }
+/* ============================================
+   ANIMATIONS FOR AI ANALYZE COMPONENT
+   Thêm vào cuối file src/index.css
+   ============================================ */
+
+/* Float animation - cho placeholder icon */
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-20px); 
+  }
+}
+
+/* Shimmer effect - cho result header */
+@keyframes shimmer {
+  0% { 
+    transform: translateX(-100%); 
+  }
+  100% { 
+    transform: translateX(100%); 
+  }
+}
+
+/* Slide up animation - cho result card */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Fade in animation - cho tabs content */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Utility classes */
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Shadow glow effect cho buttons */
+.shadow-glow-gold {
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+.hover\:shadow-glow-gold:hover {
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
+}

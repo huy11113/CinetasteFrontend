@@ -1,3 +1,5 @@
+// src/components/ai-studio/analyze/types.ts
+
 export interface NutritionEstimate {
   calories: number;
   protein: string;
@@ -5,18 +7,18 @@ export interface NutritionEstimate {
   fat: string;
 }
 
-export interface PairingSuggestionsDto {
+export interface PairingSuggestions {
   drinks: string[];
   sideDishes: string[];
 }
 
-export interface RecipeIngredientDto {
+export interface RecipeIngredient {
   name: string;
   quantity: string;
   unit: string;
 }
 
-export interface RecipeInstructionDto {
+export interface RecipeInstruction {
   step: number;
   description: string;
 }
@@ -26,8 +28,15 @@ export interface RecipeDetail {
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   servings: number;
-  ingredients: RecipeIngredientDto[];
-  instructions: RecipeInstructionDto[];
+  ingredients: RecipeIngredient[];
+  instructions: RecipeInstruction[];
+}
+
+export interface MovieContext {
+  title: string;
+  scene_description: string;
+  significance: string;
+  wikipedia_link?: string;
 }
 
 export interface AnalyzeDishResponse {
@@ -36,14 +45,9 @@ export interface AnalyzeDishResponse {
   description: string;
   nutrition_estimate: NutritionEstimate;
   health_tags: string[];
-  pairing_suggestions: PairingSuggestionsDto;
+  pairing_suggestions: PairingSuggestions;
   recipe: RecipeDetail;
   tips: string[];
-  // Các trường bổ sung cho UI
-  movie_context?: {
-    title: string;
-    scene_description: string;
-    significance: string;
-    wikipedia_link?: string;
-  };
+  movie_context?: MovieContext;
+  cultural_significance?: string;
 }
