@@ -1,91 +1,24 @@
-// src/pages/Browse.tsx
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { SlidersHorizontal } from 'lucide-react';
+import { SlidersHorizontal, Loader2 } from 'lucide-react'; // Thêm Loader2
 import SearchBar from '../components/ui/SearchBar';
-import Button from '../components/ui/Button';
 import apiClient from '../services/apiClient';
-import { type Recipe } from '../types';
+import { type RecipeSummary } from '../types'; // Import type chuẩn
 
-// Import các component con mới
 import FilterSidebar from '../components/browse/FilterSidebar';
 import RecipeGrid from '../components/browse/RecipeGrid';
 import Pagination from '../components/browse/Pagination';
 
-// --- DỮ LIỆU TĨNH ĐỂ XEM TRƯỚC ---
-const STATIC_RECIPES = [
-  // (Tôi sẽ rút gọn mảng này cho ngắn, bạn có thể dùng mảng đầy đủ của mình)
-  {
-    id: '1',
-    title: 'Ratatouille - Classic French Vegetable Stew',
-    image: 'https://images.pexels.com/photos/8753657/pexels-photo-8753657.jpeg?auto=compress&cs=tinysrgb&w=800',
-    movieTitle: 'Ratatouille',
-    cookingTime: 45,
-    difficulty: 'Medium' as const,
-    rating: 4.8,
-    reviewCount: 234,
-  },
-  {
-    id: '2',
-    title: 'Butter Beer - Harry Potter Magic Drink',
-    image: 'https://images.pexels.com/photos/1684032/pexels-photo-1684032.jpeg?auto=compress&cs=tinysrgb&w=800',
-    movieTitle: 'Harry Potter',
-    cookingTime: 15,
-    difficulty: 'Easy' as const,
-    rating: 4.9,
-    reviewCount: 567,
-  },
-  // ... (thêm 7 công thức còn lại của bạn vào đây)
-  {
-    id: '9',
-    title: 'Grilled Cheese - Chef Movie Classic',
-    image: 'https://images.pexels.com/photos/1583884/pexels-photo-1583884.jpeg?auto=compress&cs=tinysrgb&w=800',
-    movieTitle: 'Chef',
-    cookingTime: 10,
-    difficulty: 'Easy' as const,
-    rating: 4.7,
-    reviewCount: 892,
-  },
-];
-// ------------------------------------
-
-// --- CÁC HÀM HELPER ---
-
-// Kiểu dữ liệu mà RecipeCard của bạn đang mong đợi
-type BrowseRecipeCard = {
-  id: string;
-  title: string;
-  image: string;
-  movieTitle: string;
-  cookingTime: number;
-  difficulty: "Easy" | "Medium" | "Hard";
-  rating: number;
-  reviewCount: number;
-}
-
-// Hàm chuyển đổi độ khó
-const mapDifficulty = (diff: number): 'Easy' | 'Medium' | 'Hard' => {
-  if (diff <= 1) return 'Easy';
-  if (diff >= 3) return 'Hard';
-  return 'Medium';
+// Hàm chuyển đổi số difficulty sang chuỗi để hiển thị UI
+const mapDifficultyLabel = (diff: number): "Easy" | "Medium" | "Hard" => {
+  if (diff <= 1) return "Easy";
+  if (diff >= 4) return "Hard";
+  return "Medium";
 };
 
-// Hàm chuyển đổi từ API (Recipe) sang Card (BrowseRecipeCard)
-const mapApiToCardProps = (recipe: Recipe): BrowseRecipeCard => ({
-  id: recipe.id,
-  title: recipe.title,
-  image: recipe.mainImageUrl,
-  movieTitle: recipe.movieTitle,
-  cookingTime: (recipe.prepTimeMinutes || 0) + (recipe.cookTimeMinutes || 0),
-  difficulty: mapDifficulty(recipe.difficulty),
-  rating: recipe.avgRating,
-  reviewCount: recipe.ratingsCount,
-});
-// ------------------------------------
-
-// --- COMPONENT CHÍNH ---
 export default function Browse() {
   const [showFilters, setShowFilters] = useState(false);
+  // State cho bộ lọc
   const [filters, setFilters] = useState({
     difficulty: [] as string[],
     cookingTime: '' as string,
@@ -96,168 +29,140 @@ export default function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   
-  const [recipes, setRecipes] = useState<BrowseRecipeCard[]>(STATIC_RECIPES);
+  const [recipes, setRecipes] = useState<any[]>([]); // Dữ liệu hiển thị
   const [isLoading, setIsLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0); 
-  const [totalPages, setTotalPages] = useState(1); 
-  const [totalResults, setTotalResults] = useState(STATIC_RECIPES.length);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1); // 1-based cho UI
 
-  // --- HÀM GỌI API (ĐANG TẠM COMMENT OUT) ---
-  /*
-  const fetchRecipes = async (page: number, query: string) => {
+  // Gọi API lấy dữ liệu
+  const fetchRecipes = async (page: number) => {
     setIsLoading(true);
     try {
+      // Backend Spring Boot dùng 0-based index cho page
       const params = {
-        page: page,
-        size: 9, 
-        sort: 'createdAt,desc',
-        q: query || undefined,
-        // TODO: Thêm các filter từ state 'filters' vào params
+        page: page - 1, 
+        size: 9,
+        sort: 'createdAt,desc'
       };
 
       const response = await apiClient.get('/recipes', { params });
-      
-      const apiRecipes = (response.data.content || []).map(mapApiToCardProps);
-      setRecipes(apiRecipes);
-      setTotalPages(response.data.totalPages || 0);
-      setTotalResults(response.data.totalElements || 0);
-      setCurrentPage(response.data.number || 0);
+      const data = response.data; // Page<RecipeResponse>
 
+      // Map dữ liệu từ API sang format của UI Component
+      const mappedRecipes = data.content.map((r: RecipeSummary) => ({
+        id: r.id,
+        title: r.title,
+        image: r.mainImageUrl || 'https://via.placeholder.com/400x300?text=No+Image',
+        movieTitle: r.movieTitle || 'Unknown Movie',
+        cookingTime: (r.prepTimeMinutes || 0) + (r.cookTimeMinutes || 0),
+        difficulty: mapDifficultyLabel(r.difficulty),
+        rating: r.avgRating,
+        reviewCount: r.ratingsCount,
+      }));
+
+      setRecipes(mappedRecipes);
+      setTotalPages(data.totalPages);
+      
     } catch (error) {
-      console.error("Lỗi khi tải danh sách công thức:", error);
-      setRecipes(STATIC_RECIPES); // Fallback
+      console.error("Failed to fetch recipes:", error);
+      // Có thể thêm toast error ở đây
     } finally {
       setIsLoading(false);
     }
   };
-  */
-  // -----------------------------------------
 
-  // --- Cập nhật state khi URL thay đổi ---
+  // Effect: Chạy khi URL thay đổi (page hoặc query)
   useEffect(() => {
-    const queryFromUrl = searchParams.get('q') || '';
-    const pageFromUrl = parseInt(searchParams.get('page') || '1', 10) - 1;
-    
-    setSearchQuery(queryFromUrl);
-    setCurrentPage(pageFromUrl);
-    
-    // Bật dòng này khi muốn chạy API
-    // fetchRecipes(pageFromUrl, queryFromUrl); 
-    
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
-  // ------------------------------------
+    const page = parseInt(searchParams.get('page') || '1');
+    setCurrentPage(page);
+    const query = searchParams.get('q') || '';
+    setSearchQuery(query);
 
-  // --- CÁC HÀM XỬ LÝ ---
-  
+    fetchRecipes(page);
+  }, [searchParams]);
+
+  // Xử lý tìm kiếm
   const handleBrowseSearch = (query: string) => {
     setSearchQuery(query);
     const newParams = new URLSearchParams(searchParams);
-    if (query) {
-      newParams.set('q', query);
-    } else {
-      newParams.delete('q');
-    }
-    newParams.set('page', '1');
+    if (query) newParams.set('q', query);
+    else newParams.delete('q');
+    newParams.set('page', '1'); // Reset về trang 1
     setSearchParams(newParams);
   };
 
-  const handlePageChange = (newPage: number) => { // newPage là 1-based
-    if (newPage < 1 || newPage > totalPages) return;
-    setCurrentPage(newPage - 1);
+  // Xử lý chuyển trang
+  const handlePageChange = (newPage: number) => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set('page', newPage.toString());
     setSearchParams(newParams);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Các hàm filter (Giữ nguyên logic UI)
   const toggleFilter = (category: keyof typeof filters, value: string) => {
-    setFilters(prevFilters => {
-      const newFilters = { ...prevFilters };
-      if (category === 'cookingTime') {
-        newFilters[category] = prevFilters[category] === value ? '' : value;
-      } else {
-        const current = prevFilters[category] as string[];
-        newFilters[category] = current.includes(value)
-          ? current.filter(v => v !== value)
-          : [...current, value];
-      }
-      return newFilters;
+    setFilters(prev => {
+      const isMulti = Array.isArray(prev[category]);
+      if (!isMulti) return { ...prev, [category]: prev[category] === value ? '' : value };
+      
+      const list = prev[category] as string[];
+      const newList = list.includes(value) 
+        ? list.filter(i => i !== value) 
+        : [...list, value];
+      return { ...prev, [category]: newList };
     });
-    // TODO: Gọi lại API sau khi filter
-    // fetchRecipes(0, searchQuery); 
   };
 
-  const clearFilters = () => {
-    setFilters({ difficulty: [], cookingTime: '', cuisine: [], dietary: [] });
-    // TODO: Gọi lại API sau khi xóa filter
-    // fetchRecipes(0, searchQuery);
-  };
-
-  // --- RENDER ---
   return (
-    <div className="min-h-screen pt-20 pb-12">
+    <div className="min-h-screen pt-24 pb-12 bg-cinematic-darker">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Tiêu đề trang */}
-        <div className="mb-8">
-          <h1 className="section-title">Khám phá Công thức</h1>
-          <p className="text-gray-400">Khám phá các món ăn từ bộ phim yêu thích của bạn</p>
+        <div className="mb-8 animate-fade-in">
+          <h1 className="text-4xl font-display font-bold text-white mb-2">
+            Khám phá <span className="text-cinematic-gold">Ẩm thực Điện ảnh</span>
+          </h1>
+          <p className="text-gray-400">Hàng trăm công thức từ những bộ phim kinh điển đang chờ bạn.</p>
         </div>
 
-        {/* Thanh tìm kiếm */}
         <div className="mb-8">
           <SearchBar 
             onSearch={handleBrowseSearch}
-            key={searchQuery} 
             initialValue={searchQuery}
-            placeholder="Tìm theo phim, món ăn, hoặc nguyên liệu..."
+            placeholder="Tìm món ăn, phim..."
           />
         </div>
 
-        {/* Bố cục chính (Sidebar + Main) */}
         <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* Component Sidebar */}
           <FilterSidebar 
             showFilters={showFilters}
             filters={filters}
             onToggleFilter={toggleFilter}
-            onClearFilters={clearFilters}
+            onClearFilters={() => setFilters({ difficulty: [], cookingTime: '', cuisine: [], dietary: [] })}
             onClose={() => setShowFilters(false)}
           />
 
-          {/* Phần nội dung chính */}
           <main className="flex-1">
-            {/* Thanh Sắp xếp / Nút lọc mobile */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-gray-400">
-                Hiển thị <span className="text-white font-semibold">{totalResults}</span> công thức
+                Trang {currentPage} / {totalPages}
               </p>
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={() => setShowFilters(true)}
-                  className="lg:hidden btn-secondary flex items-center space-x-2"
-                >
-                  <SlidersHorizontal className="w-4 h-4" />
-                  <span>Lọc</span>
-                </button>
-                <select className="px-4 py-2 bg-cinematic-gray-light border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-cinematic-accent">
-                  <option>Phổ biến nhất</option>
-                  <option>Đánh giá cao nhất</option>
-                  <option>Mới nhất</option>
-                  <option>Thời gian nấu</option>
-                </select>
-              </div>
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="lg:hidden flex items-center gap-2 px-4 py-2 bg-cinematic-gray border border-gray-700 rounded-lg text-white"
+              >
+                <SlidersHorizontal className="w-4 h-4" /> Lọc
+              </button>
             </div>
 
-            {/* Component Lưới công thức */}
-            <RecipeGrid 
-              isLoading={isLoading}
-              recipes={recipes}
-            />
+            {isLoading ? (
+              <div className="flex justify-center py-20">
+                <Loader2 className="w-10 h-10 text-cinematic-gold animate-spin" />
+              </div>
+            ) : (
+              <RecipeGrid isLoading={isLoading} recipes={recipes} />
+            )}
 
-            {/* Component Phân trang */}
             <Pagination 
-              currentPage={currentPage}
+              currentPage={currentPage - 1} // Pagination component dùng 0-based
               totalPages={totalPages}
               onPageChange={handlePageChange}
             />

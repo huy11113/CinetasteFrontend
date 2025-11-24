@@ -1,73 +1,102 @@
 // src/types/index.ts
-export type RecipeDifficulty = 'Easy' | 'Medium' | 'Hard';
 
-// (Recipe - Dạng tóm tắt cho trang Browse - giữ nguyên)
-export interface Recipe {
+// 1. Type cho User (khớp với UserBasicInfo.java)
+export interface UserBasicInfo {
+  id: string;
+  username: string;
+  displayName: string;
+  profileImageUrl: string | null;
+}
+
+// 2. Type cho Recipe tóm tắt (khớp với RecipeResponse.java dùng trong danh sách)
+export interface RecipeSummary {
   id: string;
   authorId: string;
   title: string;
   slug: string;
   summary: string;
-  mainImageUrl: string;
+  difficulty: number; // Backend trả về 1-5
   prepTimeMinutes: number;
   cookTimeMinutes: number;
-  difficulty: number;
   servings: number;
+  mainImageUrl: string;
   avgRating: number;
-  createdAt: string;
-  movieTitle: string;
   ratingsCount: number;
+  createdAt: string;
+  movieTitle: string | null;
 }
 
-// --- THÊM CÁC INTERFACE MỚI CHO TRANG CHI TIẾT ---
+// 3. Type cho chi tiết Recipe (khớp với RecipeDetailResponse.java)
+export interface RecipeIngredientDetail {
+  name: string;
+  quantityUnit: string; // Ví dụ: "200g"
+  isOptional: boolean;
+}
 
-// Khớp với RecipeStepDto.java
-export interface RecipeStep {
+export interface RecipeStepDetail {
   step: number;
   title: string;
   description: string;
   imageUrl: string | null;
 }
 
-// Khớp với RecipeIngredientDto.java
-export interface RecipeIngredient {
-  name: string;
-  quantityUnit: string;
-  isOptional: boolean;
-}
-
-// Khớp với AuthorDto
 export interface RecipeAuthor {
   id: string;
   name: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
 }
 
-// Khớp với MovieDto
-export interface RecipeMovie {
+export interface RecipeMovieInfo {
   title: string;
   year: number | null;
   posterUrl: string | null;
 }
 
-// Khớp với RecipeDetailResponse.java
-export interface RecipeDetail {
-  id: string;
-  title: string;
-  slug: string;
-  summary: string; // Đây là 'description' trong file cũ
+export interface RecipeDetail extends Omit<RecipeSummary, 'authorId' | 'movieTitle'> {
+  ingredients: RecipeIngredientDetail[];
+  instructions: RecipeStepDetail[];
+  nutrition: Record<string, string>; // Map<String, String> từ Java
+  author: RecipeAuthor;
+  movie: RecipeMovieInfo | null;
+}
+
+// 4. Type cho phản hồi từ AI (khớp với AnalyzeDishResponse.java và các DTO con)
+// LƯU Ý: Backend dùng @JsonProperty để trả về snake_case cho một số trường
+export interface NutritionEstimate {
+  calories: number;
+  protein: string;
+  carbs: string;
+  fat: string;
+}
+
+export interface PairingSuggestions {
+  drinks: string[];
+  sideDishes: string[];
+}
+
+export interface AIRecipeDetail {
   difficulty: number;
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   servings: number;
-  mainImageUrl: string;
-  avgRating: number;
-  ratingsCount: number;
-  createdAt: string;
-  
-  ingredients: RecipeIngredient[];
-  instructions: RecipeStep[];
-  nutrition: Record<string, string>; // Dùng Record<string, string> cho Map
-  author: RecipeAuthor;
-  movie: RecipeMovie | null;
+  ingredients: { name: string; quantity: string; unit: string }[];
+  instructions: { step: number; description: string }[];
+}
+
+export interface AnalyzeDishResponse {
+  dish_name: string; // @JsonProperty("dish_name")
+  origin: string;
+  description: string;
+  nutrition_estimate: NutritionEstimate; // @JsonProperty("nutrition_estimate")
+  health_tags: string[]; // @JsonProperty("health_tags")
+  pairing_suggestions: PairingSuggestions; // @JsonProperty("pairing_suggestions")
+  recipe: AIRecipeDetail;
+  tips: string[];
+  // Các trường bổ sung nếu AI service trả về (tùy chọn)
+  movie_context?: {
+    title: string;
+    scene_description: string;
+    significance: string;
+    wikipedia_link?: string;
+  };
 }
