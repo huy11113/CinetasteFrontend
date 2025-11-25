@@ -1,6 +1,9 @@
 // src/types/index.ts
 
-// 1. Type cho User (khớp với UserBasicInfo.java)
+// ============================================================================
+// 1. USER & AUTH TYPES (Tương thích User Service - Java)
+// ============================================================================
+
 export interface UserBasicInfo {
   id: string;
   username: string;
@@ -8,14 +11,25 @@ export interface UserBasicInfo {
   profileImageUrl: string | null;
 }
 
-// 2. Type cho Recipe tóm tắt (khớp với RecipeResponse.java dùng trong danh sách)
+export interface LoginResponse {
+  token: string;
+  username: string;
+  displayName: string;
+  profileImageUrl: string;
+}
+
+// ============================================================================
+// 2. RECIPE TYPES (Tương thích Recipe Service - Java)
+// ============================================================================
+
+// Type tóm tắt cho danh sách (Card view)
 export interface RecipeSummary {
   id: string;
   authorId: string;
   title: string;
   slug: string;
   summary: string;
-  difficulty: number; // Backend trả về 1-5
+  difficulty: number; // 1-5
   prepTimeMinutes: number;
   cookTimeMinutes: number;
   servings: number;
@@ -26,7 +40,7 @@ export interface RecipeSummary {
   movieTitle: string | null;
 }
 
-// 3. Type cho chi tiết Recipe (khớp với RecipeDetailResponse.java)
+// Các type con cho chi tiết công thức
 export interface RecipeIngredientDetail {
   name: string;
   quantityUnit: string; // Ví dụ: "200g"
@@ -52,6 +66,7 @@ export interface RecipeMovieInfo {
   posterUrl: string | null;
 }
 
+// Type chi tiết đầy đủ (Detail view)
 export interface RecipeDetail extends Omit<RecipeSummary, 'authorId' | 'movieTitle'> {
   ingredients: RecipeIngredientDetail[];
   instructions: RecipeStepDetail[];
@@ -60,43 +75,65 @@ export interface RecipeDetail extends Omit<RecipeSummary, 'authorId' | 'movieTit
   movie: RecipeMovieInfo | null;
 }
 
-// 4. Type cho phản hồi từ AI (khớp với AnalyzeDishResponse.java và các DTO con)
-// LƯU Ý: Backend dùng @JsonProperty để trả về snake_case cho một số trường
-export interface NutritionEstimate {
-  calories: number;
-  protein: string;
-  carbs: string;
-  fat: string;
+// ============================================================================
+// 3. AI FEATURE TYPES (Tương thích AI Service - Python)
+// LƯU Ý: Các trường này giữ nguyên snake_case từ JSON của Python trả về
+// ============================================================================
+
+export interface MovieContext {
+  title: string;
+  scene_description: string;
+  significance: string;
+  wikipedia_link: string;
 }
 
-export interface PairingSuggestions {
-  drinks: string[];
-  sideDishes: string[];
+export interface NutritionEstimate {
+  calories: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+}
+
+export interface RecipeIngredient {
+  name: string;
+  quantity: string;
+  unit: string;
+}
+
+export interface RecipeInstruction {
+  step: number;
+  description: string;
 }
 
 export interface AIRecipeDetail {
   difficulty: number;
-  prepTimeMinutes: number;
-  cookTimeMinutes: number;
+  // Python backend trả về snake_case cho các trường này
+  prep_time_minutes: number; 
+  cook_time_minutes: number;
   servings: number;
-  ingredients: { name: string; quantity: string; unit: string }[];
-  instructions: { step: number; description: string }[];
+  ingredients: RecipeIngredient[];
+  instructions: RecipeInstruction[];
 }
 
+export interface PairingSuggestions {
+  drinks: string[];
+  side_dishes: string[];
+}
+
+// Type trả về từ API /api/ai/analyze-dish
 export interface AnalyzeDishResponse {
-  dish_name: string; // @JsonProperty("dish_name")
+  dish_name: string;
   origin: string;
   description: string;
-  nutrition_estimate: NutritionEstimate; // @JsonProperty("nutrition_estimate")
-  health_tags: string[]; // @JsonProperty("health_tags")
-  pairing_suggestions: PairingSuggestions; // @JsonProperty("pairing_suggestions")
+  cultural_significance: string;
+  
+  // Các object con
+  movie_context: MovieContext;
+  nutrition_estimate: NutritionEstimate;
   recipe: AIRecipeDetail;
+  pairing_suggestions: PairingSuggestions;
+  
+  // Các mảng string
+  health_tags: string[];
   tips: string[];
-  // Các trường bổ sung nếu AI service trả về (tùy chọn)
-  movie_context?: {
-    title: string;
-    scene_description: string;
-    significance: string;
-    wikipedia_link?: string;
-  };
 }

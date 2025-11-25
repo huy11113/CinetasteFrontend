@@ -3,7 +3,9 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      // --- BỘ MÀU MỚI CHO GIAO DIỆN AI ---
       colors: {
+        // Màu cũ của bạn (giữ lại để không lỗi các trang khác)
         cinematic: {
           dark: '#0a0a0a',
           darker: '#050505',
@@ -14,24 +16,49 @@ export default {
           gold: '#ffd700',
           'gold-light': '#ffe44d',
         },
+        // Màu MỚI cho giao diện AI (cine-*)
+        cine: {
+          bg: '#050505',       // Đen sâu
+          card: '#0F0F0F',     // Đen xám thẻ
+          gold: '#E5C07B',     // Vàng kim loại sang trọng
+          'gold-dim': '#BFA15F',
+          burgundy: '#4A0404', // Đỏ rượu vang
+          blue: '#1A237E',
+          muted: '#525252',
+        }
       },
+      
+      // --- FONT CHỮ ---
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Playfair Display', 'serif'],
+        serif: ['Playfair Display', 'serif'], // Font tiêu đề điện ảnh
+        display: ['Oswald', 'sans-serif'],    // Font cho nút bấm/nhãn to
+        mono: ['Fira Code', 'monospace'],     // Font cho thông số kỹ thuật
       },
+
+      // --- HÌNH NỀN & GRADIENT ĐẶC BIỆT ---
       backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-cinematic': 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)',
+        'glass-gradient': 'linear-gradient(145deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)',
+        'gradient-luxury': 'radial-gradient(circle at 50% 0%, #1a1a1a 0%, #050505 100%)',
+        'aurora': 'linear-gradient(45deg, #000000, #1a0b00, #001a14, #000000)',
+        'btn-shimmer': 'linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent)',
       },
-      boxShadow: {
-        'glow-red': '0 0 20px rgba(255, 107, 107, 0.3)',
-        'glow-gold': '0 0 20px rgba(255, 215, 0, 0.3)',
-      },
+
+      // --- CẤU HÌNH ANIMATION ---
       animation: {
-        'fade-in': 'fadeIn 0.5s ease-in',
-        'slide-up': 'slideUp 0.5s ease-out',
+        'fade-in': 'fadeIn 0.5s ease-in forwards',
+        'slide-up': 'slideUp 0.5s ease-out forwards',
         'glow': 'glow 2s ease-in-out infinite',
+        
+        // Animation mới cho AI Lens
+        'spin-slow': 'spin 20s linear infinite',
+        'spin-reverse-slow': 'spin-reverse 25s linear infinite',
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'aurora': 'aurora 10s ease infinite',
+        'shimmer': 'shimmer 2s infinite',
       },
+
+      // --- KEYFRAMES CHI TIẾT ---
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
@@ -45,6 +72,28 @@ export default {
           '0%, 100%': { boxShadow: '0 0 20px rgba(255, 107, 107, 0.3)' },
           '50%': { boxShadow: '0 0 30px rgba(255, 107, 107, 0.6)' },
         },
+        // Keyframes mới
+        'spin-reverse': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(-360deg)' },
+        },
+        aurora: {
+          '0%, 100%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+        },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+      },
+
+      // --- SHADOW ---
+      boxShadow: {
+        'glow-red': '0 0 20px rgba(255, 107, 107, 0.3)',
+        'glow-gold': '0 0 20px rgba(255, 215, 0, 0.3)',
+        'cinema': '0 20px 50px -12px rgba(0, 0, 0, 0.9)',
+        'gold-glow': '0 0 20px rgba(229, 192, 123, 0.15)',
+        'red-glow': '0 0 20px rgba(128, 0, 0, 0.3)',
       },
     },
   },
