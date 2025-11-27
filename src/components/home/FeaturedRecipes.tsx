@@ -1,9 +1,7 @@
 // src/components/home/FeaturedRecipes.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { Star, Clock, Users, Bookmark, Flame, ChevronRight, ChevronLeft, Film, TrendingUp, ChefHat } from "lucide-react";
-import { type Recipe } from '../../types';
 import Button from '../ui/Button';
-import apiClient from '../../services/apiClient';
 
 // --- HÀM HELPER ---
 const mapDifficulty = (diff: number): 'Easy' | 'Medium' | 'Hard' => {
@@ -289,7 +287,7 @@ const ManualCarousel: React.FC<{ children: React.ReactNode }> = ({ children }) =
       <button
         onClick={() => scrollTo('left')}
         aria-label="Cuộn trái"
-        className={`absolute left-2 sm:left-0 sm:-left-4 top-1/2 -translate-y-1/2 z-40 
+        className={`absolute left-2 sm:-left-4 top-1/2 -translate-y-1/2 z-40 
                     w-10 h-10 sm:w-12 sm:h-12 rounded-full
                     bg-zinc-900/90 backdrop-blur-md border border-zinc-800
                     flex items-center justify-center shadow-2xl shadow-black/50
@@ -305,7 +303,7 @@ const ManualCarousel: React.FC<{ children: React.ReactNode }> = ({ children }) =
       <button
         onClick={() => scrollTo('right')}
         aria-label="Cuộn phải"
-        className={`absolute right-2 sm:right-0 sm:-right-4 top-1/2 -translate-y-1/2 z-40 
+        className={`absolute right-2 sm:-right-4 top-1/2 -translate-y-1/2 z-40 
                     w-10 h-10 sm:w-12 sm:h-12 rounded-full
                     bg-zinc-900/90 backdrop-blur-md border border-zinc-800
                     flex items-center justify-center shadow-2xl shadow-black/50
@@ -406,8 +404,8 @@ const STATIC_RECIPES: FeaturedRecipeCardProps[] = [
 
 // --- MAIN COMPONENT ---
 export default function FeaturedRecipes() {
-  const [recipes, setRecipes] = useState<FeaturedRecipeCardProps[]>(STATIC_RECIPES);
-  const [isLoading, setIsLoading] = useState(false);
+  const [recipes] = useState<FeaturedRecipeCardProps[]>(STATIC_RECIPES);
+  const [isLoading] = useState(false);
 
   return (
     <section className="relative py-16 sm:py-20 bg-black overflow-hidden">

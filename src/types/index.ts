@@ -137,3 +137,64 @@ export interface AnalyzeDishResponse {
   health_tags: string[];
   tips: string[];
 }
+// ============================================================================
+// 3. AI CREATIVE CHEF TYPES (Sáng tạo món ăn - MỚI 100%)
+// ============================================================================
+
+// Enum cho phong cách kể chuyện
+export enum NarrativeStyle {
+  COMIC_MODE = "Comic Mode",
+  MYSTIC_WHISPER = "Mystic Whisper",
+  ACTION_RUSH = "Action Rush",
+  GHIBLI_SOFT_DREAM = "Ghibli Soft Dream",
+  CYBERPUNK_LOGIC = "Cyberpunk Logic",
+  ROMANCE_MOOD = "Romance Mood",
+  DRAMA_DEEP = "Drama Deep",
+  DEFAULT = "Standard"
+}
+
+export interface FlavorProfile {
+  sweet: number;
+  sour: number;
+  spicy: number;
+  umami: number;
+  richness: number;
+}
+
+export interface Macros {
+  calories: string;
+  protein: string;
+  carbs: string;
+  fat: string;
+}
+
+// Input gửi lên Server
+export interface CreateByThemeRequest {
+  inspiration: string;
+  mood: string;
+  ingredients: string;
+  diet: string;
+  creativity: number; // 0-100
+  time: string; // 'fast' | 'medium' | 'slow'
+  difficulty: string; // 'easy' | 'medium' | 'hard'
+}
+
+// Output nhận về từ Server
+export interface CreateByThemeResponse {
+  narrativeStyle: string;
+  story: string;
+  recipeName: string;
+  ingredients: string[]; // Mảng chuỗi (khác với AnalyzeDishResponse)
+  instructions: string[]; // Mảng chuỗi
+  prepTime: string;
+  cookTime: string;
+  
+  flavorProfile: FlavorProfile;
+  platingGuide: string;
+  musicRecommendation: string;
+  visualColors: string[]; // Mã màu Hex
+  
+  connection: string; // Lời bình của đạo diễn
+  pairing: string;
+  macros: Macros;
+}

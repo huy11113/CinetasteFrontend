@@ -294,3 +294,51 @@
     100% { top: 100%; opacity: 0; }
   }
 }
+/* --- HIỆU ỨNG MỚI: CINEMA & FOOD --- */
+
+/* 1. Hiệu ứng Khói bốc lên (Steam) */
+@keyframes rise {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  20% { opacity: 0.6; }
+  100% { transform: translateY(-40px) scale(1.5); opacity: 0; }
+}
+
+.animate-steam {
+  animation: rise 3s infinite ease-out;
+}
+
+/* 2. Hiệu ứng Nhiễu phim nhựa (Film Grain) */
+.bg-film-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* 3. Hiệu ứng Zoom chậm (Slow Pan/Zoom) */
+.animate-ken-burns {
+  animation: kenBurns 20s ease-in-out infinite alternate;
+}
+
+@keyframes kenBurns {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+/* ============================================
+   CREATIVE AI CHEF - ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes slide-up {
+  0% { transform: translateY(40px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.7s ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
