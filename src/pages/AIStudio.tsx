@@ -1,146 +1,100 @@
-// src/pages/AIStudio.tsx - UPDATED
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { Sparkles } from 'lucide-react';
 
-// Import từ folder creative/
-import CinematicLoader from '../../creative/CinematicLoader';
-import CreativeChef, { ChefRequest } from '../../creative/CreativeChef';
-import CreativeResult, { ChefResponse } from '../../creative/CreativeResult';
-
-// Mock data generator (xóa khi backend ready)
-const generateMockRecipe = async (request: ChefRequest): Promise<ChefResponse> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 6000)); // 6s cho countdown
-  
-  return {
-    narrativeStyle: "Action Rush" as any,
-    story: `Trong cơn bão lửa của ${request.inspiration}, đầu bếp chiến trường tạo ra món ăn từ những gì còn sót lại. Mỗi nguyên liệu là một vũ khí, mỗi động tác nấu là một chiêu thức chiến đấu.`,
-    recipeName: `${request.inspiration} - Chiến Trường Vị Giác`,
-    ingredients: [
-      "500g thịt bò Wagyu (hoặc thịt thường)",
-      "3 củ khoai tây vàng",
-      "2 thìa canh tương ớt Sriracha",
-      "1 chén rượu vang đỏ Bordeaux",
-      "Muối biển Himalaya",
-      "Tiêu đen xay",
-      "1 nhánh hương thảo tươi",
-      "2 tép tỏi băm"
-    ],
-    instructions: [
-      "Ướp thịt bò với muối, tiêu trong 30 phút ở nhiệt độ phòng để thịt thư giãn.",
-      "Đun nóng chảo gang trên lửa lớn, thêm 1 thìa dầu ô liu extra virgin.",
-      "Áp chảo thịt mỗi mặt 3-4 phút đến khi vàng nâu đều, tạo lớp vỏ giòn.",
-      "Thêm khoai tây đã cắt múi cau, đảo đều với dầu thịt.",
-      "Rưới rượu vang đỏ, thêm hương thảo và tỏi, hạ lửa nhỏ.",
-      "Om kín nắp trong 15-20 phút đến khi khoai tây mềm.",
-      "Nêm nếm lại, rắc rau mùi tây tươi và thưởng thức nóng."
-    ],
-    prepTime: "20 phút",
-    cookTime: "45 phút",
-    flavorProfile: {
-      sweet: 20,
-      sour: 10,
-      spicy: 80,
-      umami: 70,
-      richness: 90
-    },
-    platingGuide: "Xếp miếng thịt bò ở trung tâm đĩa đen mờ, tạo hiệu ứng spotlight. Rắc khoai tây vàng xung quanh như ngọn lửa bao vây. Thêm vài nhành rau thơm và rưới sốt rượu vang đỏ tạo hiệu ứng máu chiến trường. Finish với chút muối vảy vàng.",
-    musicRecommendation: "The Avengers Theme - Alan Silvestri",
-    visualColors: ["#8B0000", "#FF4500", "#1a1a1a"],
-    connection: `Món này không chỉ là bữa ăn - đó là tuyên ngôn chiến thắng. Giống như các anh hùng trong ${request.inspiration}, thịt bò phải trải qua "thử thách lửa" để đạt độ hoàn hảo. Rượu vang đỏ tượng trưng cho máu và nước mắt của chiến trận, trong khi hương thảo mang lại sự thanh lọc sau cơn bão.`,
-    pairing: "Rượu vang đỏ Cabernet Sauvignon mạnh mẽ hoặc bia đen Guinness",
-    macros: {
-      calories: "650 kcal",
-      protein: "45g",
-      carbs: "35g",
-      fat: "28g"
-    }
-  };
-};
+// Import các component con
+// Chú ý đường dẫn: ../components/...
+import AITabs from '../components/ai-studio/AITabs';
+import AnalyzeDish from '../components/ai-studio/analyze/AnalyzeDish';
+import CreativeChef from '../components/ai-studio/CreativeChef'; // Đường dẫn đúng
+import ChefChat from '../components/ai-studio/ChefChat';
+import KitchenMentor from '../components/ai-studio/KitchenMentor';
 
 export default function AIStudio() {
-  const [data, setData] = useState<ChefResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleGenerate = async (request: ChefRequest) => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Dùng mock service (thay bằng API call thật sau)
-      const result = await generateMockRecipe(request);
-      setData(result);
-    } catch (err: any) {
-      setError(err.message || "Đạo diễn đã bỏ set quay. Vui lòng thử lại.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleReset = () => {
-    setData(null);
-    setError(null);
-  };
+  // State quản lý Tab đang chọn
+  const [activeTab, setActiveTab] = useState<'analyze' | 'create' | 'chat' | 'mentor'>('analyze');
 
   return (
-    <div className="min-h-screen w-full relative overflow-x-hidden font-sans selection:bg-amber-500 selection:text-black">
+    <div className="min-h-screen bg-[#050505] pb-20 relative">
       
-      {/* Full Screen Loader */}
-      {loading && <CinematicLoader />}
+      {/* ==============================================
+          HERO SECTION (ẢNH BÌA ĐIỆN ẢNH)
+      ============================================== */}
+      <div className="relative w-full h-[60vh] min-h-[500px] overflow-hidden group">
+        
+        {/* 1. ẢNH NỀN (Background Image) */}
+        <div className="absolute inset-0">
+           <img 
+             src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop" 
+             alt="Cinematic Food Background" 
+             className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-[20s] ease-linear"
+           />
+           {/* Lớp hạt nhiễu (Noise) tạo cảm giác phim nhựa */}
+           <div className="absolute inset-0 bg-noise opacity-20 pointer-events-none"></div>
+        </div>
 
-      {/* Background */}
-      <div className="fixed inset-0 z-0 bg-[#0b0f19]">
-        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-5"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-purple-900/20 blur-[120px] rounded-full pointer-events-none"></div>
+        {/* 2. LỚP PHỦ (Gradient Overlay) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-[#050505]"></div>
+
+        {/* 3. NỘI DUNG TEXT */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 z-10 pt-10">
+           
+           {/* Badge trang trí */}
+           <div className="mb-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-md animate-fade-in">
+              <Sparkles className="w-3 h-3 text-cine-gold animate-pulse" />
+              <span className="text-[10px] font-bold tracking-[0.3em] text-cine-gold uppercase font-sans">
+                AI Culinary Cinema
+              </span>
+           </div>
+
+           {/* Tiêu đề chính */}
+           <h1 className="text-5xl md:text-7xl lg:text-8xl font-serif font-bold text-white mb-6 tracking-tight drop-shadow-2xl animate-slide-up">
+              CineTaste <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E5C07B] via-yellow-500 to-[#E5C07B]">AI Studio</span>
+           </h1>
+
+           {/* Mô tả */}
+           <p className="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto font-light leading-relaxed drop-shadow-md animate-slide-up" style={{ animationDelay: '0.1s' }}>
+              Không gian sáng tạo ẩm thực không giới hạn. <br className="hidden md:block" />
+              Từ màn ảnh đến bàn ăn, với sự hỗ trợ của <span className="text-white font-medium border-b border-cine-gold/50">Trí tuệ Nhân tạo</span>.
+           </p>
+        </div>
       </div>
 
-      <main className={`relative z-10 container mx-auto px-4 py-8 md:py-16 transition-opacity duration-700 ${loading ? 'opacity-0' : 'opacity-100'}`}>
+      {/* ==============================================
+          MAIN CONTENT CONTAINER
+      ============================================== */}
+      {/* -mt-20: Kỹ thuật Negative Margin để đẩy phần Tabs trồi lên trên ảnh Hero */}
+      <div className="relative z-20 container mx-auto px-4 sm:px-6 lg:px-8 -mt-20">
         
-        {/* Header - Chỉ hiện khi chưa có data */}
-        {!data && (
-            <div className="text-center mb-16 animate-fade-in">
-                <div className="inline-block relative">
-                    <h1 className="text-5xl md:text-8xl font-black text-white mb-2 tracking-tighter shadow-black drop-shadow-2xl">
-                        CINE<span className="text-amber-500">TASTE</span>
-                    </h1>
-                    <div className="h-1 w-full bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-70"></div>
-                </div>
-                <p className="mt-6 text-sm md:text-base text-gray-400 tracking-[0.2em] uppercase font-medium max-w-xl mx-auto">
-                    Biến Phim Ảnh Thành Mỹ Vị
-                </p>
-            </div>
-        )}
-
-        {/* Error Toast */}
-        {error && (
-             <div className="fixed top-10 left-1/2 -translate-x-1/2 bg-red-900/90 text-red-100 border border-red-500 px-6 py-4 rounded-md shadow-2xl z-50 animate-slide-up flex items-center backdrop-blur-md">
-                <span className="mr-3 text-2xl">🎬</span> 
-                <div>
-                    <p className="font-bold uppercase text-xs tracking-wider mb-1">Lỗi Sản Xuất</p>
-                    <p className="text-sm">{error}</p>
-                </div>
-                <button onClick={() => setError(null)} className="ml-6 p-2 hover:text-white transition-colors">✕</button>
-             </div>
-        )}
-
-        {/* Dynamic Content */}
-        <div className="flex justify-center">
-          {!data ? (
-            <CreativeChef onSubmit={handleGenerate} isLoading={loading} />
-          ) : (
-            <CreativeResult data={data} onReset={handleReset} />
-          )}
+        {/* Navigation Tabs */}
+        <div className="mb-8 shadow-2xl rounded-xl">
+           <AITabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
-      </main>
 
-      {/* Footer */}
-      {!loading && !data && (
-          <footer className="fixed bottom-6 w-full text-center z-0 pointer-events-none opacity-30 hover:opacity-100 transition-opacity">
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-mono">
-                Đạo diễn bởi Gemini AI • Phiên bản 1.0
-            </p>
-          </footer>
-      )}
+        {/* Khu vực hiển thị chức năng chính */}
+        <div className="min-h-[600px] animate-fade-in">
+           
+           {/* Tab 1: Phân tích ảnh */}
+           {activeTab === 'analyze' && <AnalyzeDish />}
+           
+           {/* Tab 2: Sáng tạo (Đã sửa lỗi import) */}
+           {activeTab === 'create' && <CreativeChef />}
+           
+           {/* Tab 3: Trò chuyện (Placeholder) */}
+           {activeTab === 'chat' && (
+             <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl p-12 text-center">
+                <ChefChat />
+             </div>
+           )}
+           
+           {/* Tab 4: Giám khảo (Placeholder) */}
+           {activeTab === 'mentor' && (
+             <div className="bg-[#0a0a0a] border border-white/10 rounded-3xl p-12 text-center">
+                <KitchenMentor />
+             </div>
+           )}
+        </div>
+
+      </div>
     </div>
   );
 }

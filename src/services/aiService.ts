@@ -68,7 +68,7 @@ export const aiService = {
         }
       );
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Create Recipe Error:", error);
       if (axios.isAxiosError(error) && error.response?.data?.detail) {
         throw new Error(error.response.data.detail);

@@ -3,9 +3,9 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      // --- BỘ MÀU MỚI CHO GIAO DIỆN AI ---
+      // --- BỘ MÀU ---
       colors: {
-        // Màu cũ của bạn (giữ lại để không lỗi các trang khác)
+        // 1. Màu cũ (Giữ nguyên để không lỗi code cũ)
         cinematic: {
           dark: '#0a0a0a',
           darker: '#050505',
@@ -16,10 +16,10 @@ export default {
           gold: '#ffd700',
           'gold-light': '#ffe44d',
         },
-        // Màu MỚI cho giao diện AI (cine-*)
+        // 2. Màu MỚI cho giao diện AI Studio (cine-*)
         cine: {
           bg: '#050505',       // Đen sâu
-          card: '#0F0F0F',     // Đen xám thẻ
+          card: '#1a1f2e',     // Đen xám thẻ (quan trọng cho CreativeChef)
           gold: '#E5C07B',     // Vàng kim loại sang trọng
           'gold-dim': '#BFA15F',
           burgundy: '#4A0404', // Đỏ rượu vang
@@ -34,6 +34,7 @@ export default {
         serif: ['Playfair Display', 'serif'], // Font tiêu đề điện ảnh
         display: ['Oswald', 'sans-serif'],    // Font cho nút bấm/nhãn to
         mono: ['Fira Code', 'monospace'],     // Font cho thông số kỹ thuật
+        cinematic: ['Oswald', 'sans-serif'],  // Alias cho code tham khảo
       },
 
       // --- HÌNH NỀN & GRADIENT ĐẶC BIỆT ---
@@ -50,12 +51,13 @@ export default {
         'slide-up': 'slideUp 0.5s ease-out forwards',
         'glow': 'glow 2s ease-in-out infinite',
         
-        // Animation mới cho AI Lens
+        // Animation mới cho AI Lens & Creative Chef
         'spin-slow': 'spin 20s linear infinite',
         'spin-reverse-slow': 'spin-reverse 25s linear infinite',
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'aurora': 'aurora 10s ease infinite',
         'shimmer': 'shimmer 2s infinite',
+        'blob': 'blob 7s infinite', // <--- QUAN TRỌNG: Hiệu ứng nền trôi
       },
 
       // --- KEYFRAMES CHI TIẾT ---
@@ -84,6 +86,13 @@ export default {
         shimmer: {
           '0%': { transform: 'translateX(-100%)' },
           '100%': { transform: 'translateX(100%)' },
+        },
+        // Keyframe blob cho Creative Chef
+        blob: {
+          "0%": { transform: "translate(0px, 0px) scale(1)" },
+          "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+          "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+          "100%": { transform: "translate(0px, 0px) scale(1)" },
         },
       },
 

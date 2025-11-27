@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -40,54 +41,21 @@
    KITCHEN THEME (Warm & Cozy)
    ============================================ */
 .theme-kitchen {
-  /* ===== BACKGROUND COLORS ===== */
-  /* Màu nền tối nhất - dùng cho body, sections */
-  --bg-darker: #f5f1e8;  /* Kem nhạt */
-  
-  /* Màu nền chính - dùng cho containers */
-  --bg-dark: #faf7f0;    /* Kem sáng hơn */
-  
-  /* Màu nền cho cards, boxes */
-  --bg-gray: #ffffff;     /* Trắng tinh */
-  
-  /* Màu nền hover, highlights */
-  --bg-gray-light: #fff9f0; /* Vàng kem rất nhạt */
-  
-  /* ===== ACCENT COLORS ===== */
-  /* Màu nhấn chính - buttons, links, highlights */
-  --accent: #d97948;      /* Cam terracotta */
-  
-  /* Màu nhấn sáng - hover states */
-  --accent-light: #e89565; /* Cam sáng hơn */
-  
-  /* Màu nhấn tối - active states */
-  --accent-dark: #c76635;  /* Cam đậm */
-  
-  /* ===== GOLD COLORS ===== */
-  /* Màu vàng cho icons, badges */
-  --gold: #c9a868;        /* Vàng mơ */
-  --gold-light: #ddbf7e;  /* Vàng sáng */
-  
-  /* ===== TEXT COLORS ===== */
-  /* Text chính - headings, important text */
-  --text-primary: #3e2723;   /* Nâu đậm (dễ đọc trên nền sáng) */
-  
-  /* Text phụ - paragraphs, descriptions */
-  --text-secondary: #5d4037; /* Nâu vừa */
-  
-  /* Text mờ - hints, placeholders */
-  --text-muted: #8d6e63;     /* Nâu nhạt */
-  
-  /* ===== BORDER COLORS ===== */
-  /* Border mặc định */
-  --border-default: #d7ccc8; /* Nâu sáng */
-  
-  /* Border hover/focus */
-  --border-light: #bcaaa4;   /* Nâu đậm hơn */
-  
-  /* ===== SHADOW COLORS ===== */
-  /* Shadow cho buttons, cards khi hover */
-  --shadow-glow: rgba(217, 121, 72, 0.25); /* Cam trong suốt */
+  --bg-darker: #f5f1e8;
+  --bg-dark: #faf7f0;
+  --bg-gray: #ffffff;
+  --bg-gray-light: #fff9f0;
+  --accent: #d97948;
+  --accent-light: #e89565;
+  --accent-dark: #c76635;
+  --gold: #c9a868;
+  --gold-light: #ddbf7e;
+  --text-primary: #3e2723;
+  --text-secondary: #5d4037;
+  --text-muted: #8d6e63;
+  --border-default: #d7ccc8;
+  --border-light: #bcaaa4;
+  --shadow-glow: rgba(217, 121, 72, 0.25);
 }
 
 /* ============================================
@@ -100,7 +68,6 @@
     transition: background-color 0.3s ease, color 0.3s ease;
   }
   
-  /* Smooth transition cho tất cả background & border */
   * {
     transition-property: background-color, border-color, color;
     transition-duration: 0.3s;
@@ -109,12 +76,11 @@
 }
 
 /* ============================================
-   COMPONENT STYLES (Sử dụng CSS Variables)
+   COMPONENT STYLES
    ============================================ */
 @layer components {
   .btn-primary {
-    @apply px-6 py-3 font-medium rounded-lg
-           hover:shadow-lg transform hover:scale-105;
+    @apply px-6 py-3 font-medium rounded-lg hover:shadow-lg transform hover:scale-105;
     background-color: var(--accent);
     color: white;
     box-shadow: 0 0 20px var(--shadow-glow);
@@ -173,7 +139,7 @@
 }
 
 /* ============================================
-   UTILITY CLASSES với CSS Variables
+   UTILITY CLASSES
    ============================================ */
 @layer utilities {
   .bg-cinematic-darker { background-color: var(--bg-darker); }
@@ -191,55 +157,94 @@
   .border-gray-800 { border-color: var(--border-default); }
   
   .shadow-glow-red { box-shadow: 0 0 20px var(--shadow-glow); }
+
+  /* --- HIỆU ỨNG MỚI CHO AI STUDIO & CREATIVE CHEF --- */
+
+  /* 1. Noise Background (Hạt nhiễu phim) */
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+
+  .bg-film-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+  }
+
+  /* 2. Animation Delay Utility */
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  /* 3. Hide Scrollbar */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
 }
+
 /* ============================================
-   ANIMATIONS FOR AI ANALYZE COMPONENT
-   Thêm vào cuối file src/index.css
+   CUSTOM ANIMATIONS (Keyframes)
    ============================================ */
 
-/* Float animation - cho placeholder icon */
+/* Float Animation */
 @keyframes float {
-  0%, 100% { 
-    transform: translateY(0px); 
-  }
-  50% { 
-    transform: translateY(-20px); 
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
 }
 
-/* Shimmer effect - cho result header */
+/* Shimmer Effect */
 @keyframes shimmer {
-  0% { 
-    transform: translateX(-100%); 
-  }
-  100% { 
-    transform: translateX(100%); 
-  }
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
-/* Slide up animation - cho result card */
+/* Slide Up */
 @keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Fade in animation - cho tabs content */
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+/* Fade In */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
-/* Utility classes */
+/* Scan Effect (AI Analyzing) */
+@keyframes scan {
+  0%, 100% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Steam Rising (Food) */
+@keyframes rise {
+  0% { transform: translateY(0) scale(1); opacity: 0; }
+  20% { opacity: 0.6; }
+  100% { transform: translateY(-40px) scale(1.5); opacity: 0; }
+}
+
+/* Slow Zoom (Ken Burns Effect) */
+@keyframes kenBurns {
+  from { transform: scale(1); }
+  to { transform: scale(1.1); }
+}
+
+/* Blob Animation (Creative Chef Background) */
+@keyframes blob {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+/* --- APPLY ANIMATION CLASSES --- */
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
@@ -249,96 +254,30 @@
 }
 
 .animate-slide-up {
-  animation: slide-up 0.5s ease-out;
-}
-
-.animate-fade-in {
-  animation: fade-in 0.3s ease-out;
-}
-
-/* Shadow glow effect cho buttons */
-.shadow-glow-gold {
-  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
-}
-
-.hover\:shadow-glow-gold:hover {
-  box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
-}
-/* ============================================
-   AI SCANNER EFFECTS
-   Thêm vào cuối file src/index.css
-   ============================================ */
-
-@keyframes scan {
-  0%, 100% { top: 0%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { top: 100%; opacity: 0; }
-}
-
-/* Hiệu ứng Noise (Hạt nhiễu phim nhựa) */
-.bg-noise {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-}
-/* 2. THÊM VÀO CUỐI FILE (Hiệu ứng Scan & Noise) */
-@layer utilities {
-  .bg-noise {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-  }
-  
-  /* Hiệu ứng quét sáng cho ảnh */
-  @keyframes scan {
-    0%, 100% { top: 0%; opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { top: 100%; opacity: 0; }
-  }
-}
-/* --- HIỆU ỨNG MỚI: CINEMA & FOOD --- */
-
-/* 1. Hiệu ứng Khói bốc lên (Steam) */
-@keyframes rise {
-  0% { transform: translateY(0) scale(1); opacity: 0; }
-  20% { opacity: 0.6; }
-  100% { transform: translateY(-40px) scale(1.5); opacity: 0; }
-}
-
-.animate-steam {
-  animation: rise 3s infinite ease-out;
-}
-
-/* 2. Hiệu ứng Nhiễu phim nhựa (Film Grain) */
-.bg-film-grain {
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
-}
-
-/* 3. Hiệu ứng Zoom chậm (Slow Pan/Zoom) */
-.animate-ken-burns {
-  animation: kenBurns 20s ease-in-out infinite alternate;
-}
-
-@keyframes kenBurns {
-  from { transform: scale(1); }
-  to { transform: scale(1.1); }
-}
-/* ============================================
-   CREATIVE AI CHEF - ANIMATIONS
-   ============================================ */
-
-@keyframes fadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
-}
-
-@keyframes slide-up {
-  0% { transform: translateY(40px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  animation: slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-fade-in {
   animation: fadeIn 0.7s ease-out;
 }
 
-.animate-slide-up {
-  animation: slide-up 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+.animate-steam {
+  animation: rise 3s infinite ease-out;
+}
+
+.animate-ken-burns {
+  animation: kenBurns 20s ease-in-out infinite alternate;
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+/* --- SHADOW EFFECTS --- */
+.shadow-glow-gold {
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+}
+
+.hover\:shadow-glow-gold:hover {
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.6);
 }
