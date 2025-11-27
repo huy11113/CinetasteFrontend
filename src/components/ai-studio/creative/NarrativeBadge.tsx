@@ -1,58 +1,48 @@
-// creative/NarrativeBadge.tsx
-
-export enum NarrativeStyle {
-  COMIC_MODE = "Comic Mode",
-  MYSTIC_WHISPER = "Mystic Whisper",
-  ACTION_RUSH = "Action Rush",
-  GHIBLI_SOFT_DREAM = "Ghibli Soft Dream",
-  CYBERPUNK_LOGIC = "Cyberpunk Logic",
-  ROMANCE_MOOD = "Romance Mood",
-  DRAMA_DEEP = "Drama Deep",
-  DEFAULT = "Standard"
-}
+import React from 'react';
+import { NarrativeStyle } from '../types';
 
 interface Props {
   style: NarrativeStyle;
 }
 
-export default function NarrativeBadge({ style }: Props) {
+const NarrativeBadge: React.FC<Props> = ({ style }) => {
   let classes = "px-4 py-1.5 rounded-full text-xs md:text-sm font-bold uppercase tracking-wider shadow-lg border backdrop-blur-md flex items-center gap-2";
   let label = style.toString();
   let icon = "";
 
   switch (style) {
     case NarrativeStyle.COMIC_MODE:
-      classes += " bg-yellow-400/90 text-black border-black -rotate-1";
+      classes += " bg-yellow-500/90 text-black border-yellow-300 font-comic -rotate-1 shadow-[0_0_15px_rgba(234,179,8,0.5)]";
       icon = "💬";
       label = "Hài Hước / Comic";
       break;
     case NarrativeStyle.MYSTIC_WHISPER:
-      classes += " bg-purple-900/80 text-purple-100 border-purple-400 shadow-purple-500/30";
+      classes += " bg-indigo-900/80 text-indigo-100 border-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)]";
       icon = "🔮";
       label = "Huyền Bí / Mystic";
       break;
     case NarrativeStyle.ACTION_RUSH:
-      classes += " bg-red-700/80 text-white border-red-500 italic skew-x-[-10deg]";
+      classes += " bg-red-800/90 text-white border-red-500 italic skew-x-[-10deg] shadow-[0_0_15px_rgba(239,68,68,0.4)]";
       icon = "🔥";
       label = "Hành Động / Action";
       break;
     case NarrativeStyle.GHIBLI_SOFT_DREAM:
-      classes += " bg-green-100/90 text-green-800 border-green-300";
+      classes += " bg-teal-900/80 text-teal-100 border-teal-300 font-serif shadow-[0_0_15px_rgba(20,184,166,0.3)]";
       icon = "🍃";
       label = "Ghibli Êm Đềm";
       break;
     case NarrativeStyle.CYBERPUNK_LOGIC:
-      classes += " bg-slate-900/90 text-cyan-400 border-cyan-400 font-mono shadow-[0_0_10px_rgba(34,211,238,0.5)]";
+      classes += " bg-slate-900/90 text-cyan-400 border-cyan-400 font-mono shadow-[0_0_15px_rgba(6,182,212,0.5)]";
       icon = "🧬";
       label = "Cyberpunk / Tech";
       break;
     case NarrativeStyle.ROMANCE_MOOD:
-      classes += " bg-pink-100/90 text-pink-600 border-pink-300";
+      classes += " bg-pink-900/80 text-pink-200 border-pink-400 shadow-[0_0_15px_rgba(236,72,153,0.4)]";
       icon = "🌹";
       label = "Lãng Mạn / Romance";
       break;
     case NarrativeStyle.DRAMA_DEEP:
-      classes += " bg-gray-800/90 text-gray-200 border-gray-500";
+      classes += " bg-amber-950/80 text-amber-100 border-amber-700 font-serif shadow-[0_0_15px_rgba(180,83,9,0.3)]";
       icon = "🎭";
       label = "Tâm Lý / Drama";
       break;
@@ -70,4 +60,6 @@ export default function NarrativeBadge({ style }: Props) {
       </span>
     </div>
   );
-}
+};
+
+export default NarrativeBadge;

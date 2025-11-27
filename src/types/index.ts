@@ -137,21 +137,9 @@ export interface AnalyzeDishResponse {
   health_tags: string[];
   tips: string[];
 }
+/ ============================================================================
+// 3. AI CREATIVE CHEF TYPES (Cập nhật cho khớp Backend mới)
 // ============================================================================
-// 3. AI CREATIVE CHEF TYPES (Sáng tạo món ăn - MỚI 100%)
-// ============================================================================
-
-// Enum cho phong cách kể chuyện
-export enum NarrativeStyle {
-  COMIC_MODE = "Comic Mode",
-  MYSTIC_WHISPER = "Mystic Whisper",
-  ACTION_RUSH = "Action Rush",
-  GHIBLI_SOFT_DREAM = "Ghibli Soft Dream",
-  CYBERPUNK_LOGIC = "Cyberpunk Logic",
-  ROMANCE_MOOD = "Romance Mood",
-  DRAMA_DEEP = "Drama Deep",
-  DEFAULT = "Standard"
-}
 
 export interface FlavorProfile {
   sweet: number;
@@ -161,40 +149,58 @@ export interface FlavorProfile {
   richness: number;
 }
 
-export interface Macros {
-  calories: string;
-  protein: string;
-  carbs: string;
-  fat: string;
+export interface VisualGuide {
+  layout_description: string;
+  color_palette: string[]; // Mảng mã màu Hex
+  plating_style: string;
 }
 
-// Input gửi lên Server
+// Input gửi lên Server (Khớp với Pydantic Request)
 export interface CreateByThemeRequest {
   inspiration: string;
   mood: string;
-  ingredients: string;
+  ingredients?: string;
   diet: string;
-  creativity: number; // 0-100
-  time: string; // 'fast' | 'medium' | 'slow'
-  difficulty: string; // 'easy' | 'medium' | 'hard'
+  creativity: number; 
+  time: string; 
+  difficulty: string;
+  dining_style?: string;
+  skill_level?: string;
 }
 
-// Output nhận về từ Server
+// Output nhận về từ Server (Khớp với Pydantic Response)
 export interface CreateByThemeResponse {
-  narrativeStyle: string;
+  recipeName: string;      // Backend: recipeName
+  narrativeStyle: string;  // Backend: narrativeStyle
   story: string;
-  recipeName: string;
-  ingredients: string[]; // Mảng chuỗi (khác với AnalyzeDishResponse)
-  instructions: string[]; // Mảng chuỗi
+  connection: string;
+  
+  // ⚠️ QUAN TRỌNG: Backend trả về mảng chuỗi, không phải object
+  ingredients: string[];   
+  instructions: string[]; 
+  
   prepTime: string;
   cookTime: string;
   
-  flavorProfile: FlavorProfile;
-  platingGuide: string;
-  musicRecommendation: string;
-  visualColors: string[]; // Mã màu Hex
+  flavorProfile: {
+    sweet: number;
+    sour: number;
+    spicy: number;
+    umami: number;
+    richness: number;
+  };
   
-  connection: string; // Lời bình của đạo diễn
+  visualColors: string[]; // Mảng mã màu Hex (VD: ["#FF0000", ...])
+  platingGuide: string;
   pairing: string;
-  macros: Macros;
+  musicRecommendation: string;
+  
+  macros: {
+    calories: string;
+    protein: string;
+    carbs: string;
+    fat: string;
+  };
+  
+  origin: string;
 }
