@@ -1,10 +1,18 @@
 import React from 'react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
-import { FlavorProfile } from '../types';
+
+// Định nghĩa interface tại đây thay vì import
+interface FlavorProfile {
+  sweet: number;
+  sour: number;
+  spicy: number;
+  umami: number;
+  richness: number;
+}
 
 interface FlavorChartProps {
   data: FlavorProfile;
-  color?: string; // Optional custom color override
+  color?: string;
 }
 
 const FlavorChart: React.FC<FlavorChartProps> = ({ data, color = "#fbbf24" }) => {

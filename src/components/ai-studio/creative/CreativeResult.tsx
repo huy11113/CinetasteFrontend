@@ -1,12 +1,83 @@
 import React, { useState } from 'react';
-import { ChefResponse, NarrativeStyle } from '../src/components/ai-studio/creative/types';
+import { CreateByThemeResponse } from '../../../types/index';
 import FlavorChart from './FlavorChart';
 import NarrativeBadge from './NarrativeBadge';
 
 interface Props {
-  data: ChefResponse;
+  data: CreateByThemeResponse;
   onReset: () => void;
 }
+
+// ============================================================================
+// HELPER FUNCTIONS FOR COLORS
+// ============================================================================
+
+/**
+ * Generate fallback colors based on narrative style STRING (not enum)
+ */
+const getFallbackColors = (styleString: string): string[] => {
+  // Normalize string để so sánh dễ dàng
+  const style = styleString.toLowerCase().replace(/\s+/g, '');
+  
+  console.log('🎨 getFallbackColors for style:', styleString, '-> normalized:', style);
+  
+  switch (style) {
+    case 'actionrush': 
+      return ['#7f1d1d', '#f97316', '#000000']; // Blood Red, Explosion Orange, Void Black
+    
+    case 'cyberpunklogic': 
+      return ['#020617', '#06b6d4', '#d946ef']; // Deep Space, Neon Cyan, Neon Fuchsia
+    
+    case 'ghiblisoftdream': 
+      return ['#15803d', '#0ea5e9', '#eab308']; // Forest, Sky, Sun
+    
+    case 'mysticwhisper': 
+      return ['#2e1065', '#6366f1', '#14b8a6']; // Deep Violet, Indigo, Teal Glow
+    
+    case 'comicmode': 
+      return ['#facc15', '#ef4444', '#2563eb']; // Pop Yellow, Hero Red, Comic Blue
+    
+    case 'romancemood': 
+      return ['#881337', '#ec4899', '#fb7185']; // Burgundy, Hot Pink, Blush
+    
+    case 'dramadeep':
+      return ['#451a03', '#78350f', '#171717']; // Deep Brown, Sepia, Shadow
+
+    default: 
+      console.warn('⚠️ No match for style, using default colors');
+      return ['#0f172a', '#334155', '#94a3b8']; // Standard Slate
+  }
+};
+
+/**
+ * Get effective colors with proper fallback logic
+ */
+const getEffectiveColors = (data: CreateByThemeResponse): string[] => {
+  console.log('🎨 Checking colors:', {
+    visualColors: data.visualColors,
+    visualColorsLength: data.visualColors?.length,
+    narrativeStyle: data.narrativeStyle
+  });
+  
+  // Ưu tiên 1: Dùng màu từ backend (nếu có ≥ 2 màu hợp lệ)
+  if (data.visualColors && Array.isArray(data.visualColors) && data.visualColors.length >= 2) {
+    // Validate hex codes
+    const validColors = data.visualColors.filter(c => /^#[0-9A-Fa-f]{6}$/.test(c));
+    if (validColors.length >= 2) {
+      console.log('✅ Using backend colors:', validColors);
+      return validColors;
+    }
+  }
+  
+  // Ưu tiên 2: Dùng màu fallback theo narrative style
+  const fallbackColors = getFallbackColors(data.narrativeStyle);
+  console.log('⚠️ Using fallback colors for', data.narrativeStyle, ':', fallbackColors);
+  return fallbackColors;
+};
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
 
 const CreativeResult: React.FC<Props> = ({ data, onReset }) => {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
@@ -21,51 +92,21 @@ const CreativeResult: React.FC<Props> = ({ data, onReset }) => {
     setCheckedIngredients(next);
   };
 
-  // --- Dynamic Color Logic ---
-  // Return richer, 3-color palettes for Mesh Gradients
-  // UPDATED: Tuned for more cinematic, deep, and distinct vibes per theme
-  const getFallbackColors = (style: NarrativeStyle): string[] => {
-    switch (style) {
-      case NarrativeStyle.ACTION_RUSH: 
-        return ['#7f1d1d', '#f97316', '#000000']; // Blood Red, Explosion Orange, Void Black
-      
-      case NarrativeStyle.CYBERPUNK_LOGIC: 
-        return ['#020617', '#06b6d4', '#d946ef']; // Deep Space, Neon Cyan, Neon Fuchsia
-      
-      case NarrativeStyle.GHIBLI_SOFT_DREAM: 
-        // Using slightly deeper greens/blues so they glow nicely in Screen mode on dark bg
-        return ['#15803d', '#0ea5e9', '#eab308']; // Forest, Sky, Sun
-      
-      case NarrativeStyle.MYSTIC_WHISPER: 
-        return ['#2e1065', '#6366f1', '#14b8a6']; // Deep Violet, Indigo, Teal Glow
-      
-      case NarrativeStyle.COMIC_MODE: 
-        return ['#facc15', '#ef4444', '#2563eb']; // Pop Yellow, Hero Red, Comic Blue
-      
-      case NarrativeStyle.ROMANCE_MOOD: 
-        return ['#881337', '#ec4899', '#fb7185']; // Burgundy, Hot Pink, Blush
-      
-      case NarrativeStyle.DRAMA_DEEP:
-        return ['#451a03', '#78350f', '#171717']; // Deep Brown, Sepia, Shadow (Noir/Vintage)
-
-      default: 
-        return ['#0f172a', '#334155', '#94a3b8']; // Standard Slate
-    }
-  };
-
-  // Ensure we have at least 3 colors for the mesh effect
-  let colors = (data.visualColors && data.visualColors.length >= 2) 
-    ? data.visualColors 
-    : getFallbackColors(data.narrativeStyle);
+  // --- GET COLORS ---
+  let colors = getEffectiveColors(data);
   
-  // Pad if missing 3rd color
-  if (colors.length < 3) colors.push(colors[0]);
+  // Ensure we have at least 3 colors for mesh gradient
+  if (colors.length < 3) {
+    colors.push(colors[0]); // Duplicate first color
+  }
 
   const c1 = colors[0];
   const c2 = colors[1];
   const c3 = colors[2];
 
-  // Mesh Gradient Background (Complex Radial layers)
+  console.log('🖌️ Final colors used:', { c1, c2, c3 });
+
+  // --- MESH GRADIENT STYLE ---
   const gradientStyle = {
     backgroundColor: '#050505',
     backgroundImage: `
@@ -240,7 +281,7 @@ const CreativeResult: React.FC<Props> = ({ data, onReset }) => {
                      <FlavorChart data={data.flavorProfile} color={c2} />
                 </div>
 
-                {/* Critics Rating (Macros) - UPDATED COLORS */}
+                {/* Critics Rating (Macros) */}
                 <div className="bg-[#111] rounded-2xl border border-white/20 p-2 relative shadow-xl">
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-black px-4 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg">
                         Đánh Giá (Dinh Dưỡng)
@@ -295,6 +336,7 @@ const CreativeResult: React.FC<Props> = ({ data, onReset }) => {
                         target="_blank" 
                         rel="noreferrer"
                         className="absolute inset-0 z-30"
+                        aria-label={`Tìm nhạc ${data.musicRecommendation} trên YouTube`}
                     ></a>
                 </div>
 
@@ -305,4 +347,4 @@ const CreativeResult: React.FC<Props> = ({ data, onReset }) => {
   );
 };
 
-export default CreativeResult
+export default CreativeResult;
