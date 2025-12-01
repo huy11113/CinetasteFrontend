@@ -5,21 +5,23 @@ import {
 } from 'lucide-react';
 import { aiService } from '../../services/aiService';
 import { CreateByThemeResponse, CreateByThemeRequest } from '../../types/index';
-// Đảm bảo đường dẫn import đúng với cấu trúc thư mục của bạn
 import CreativeResult from './creative/CreativeResult';
 import CinematicError from './analyze/CinematicError';
 import CinematicLoader from './creative/CinematicLoader';
 
-// --- CONSTANTS ---
+// ============================================================================
+// CONSTANTS - UPDATED WITH NEW PERSONAS MAPPING
+// ============================================================================
+
 const MOODS = [
-  { id: 'Normal', label: 'Bình Thường', icon: '😐' },
-  { id: 'Adventure', label: 'Phiêu Lưu', icon: '🗺️' },
-  { id: 'Comedy', label: 'Hài Hước', icon: '😂' },
-  { id: 'Horror', label: 'Kinh Dị', icon: '👻' },
-  { id: 'Romance', label: 'Lãng Mạn', icon: '🌹' },
-  { id: 'Sci-Fi', label: 'Viễn Tưởng', icon: '👽' },
-  { id: 'Action', label: 'Hành Động', icon: '💥' },
-  { id: 'Ghibli', label: 'Ghibli', icon: '🍃' },
+  { id: 'Normal', label: 'Bình Thường', icon: '😐', persona: 'Chef\'s Table' },
+  { id: 'Comedy', label: 'Hài Hước', icon: '😂', persona: 'Comic Mode' },
+  { id: 'Action', label: 'Hành Động', icon: '💥', persona: 'Action Rush' },
+  { id: 'Romance', label: 'Lãng Mạn', icon: '🌹', persona: 'Romance Mood' },
+  { id: 'Drama', label: 'Kịch Tính', icon: '🎭', persona: 'Drama Deep' },
+  { id: 'Horror', label: 'Kinh Dị', icon: '👻', persona: 'Horror Night' },
+  { id: 'Anime', label: 'Anime', icon: '🍜', persona: 'Anime Feast' },
+  { id: 'Documentary', label: 'Tài Liệu', icon: '📺', persona: 'Travel Discovery' },
 ];
 
 const DIETS = [
@@ -29,7 +31,10 @@ const DIETS = [
   { id: 'EatClean', label: 'Eat Clean' },
 ];
 
-// Không cần interface Props có onSubmit nữa vì component này tự xử lý
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
 export default function CreativeChef() {
   // --- STATE ---
   const [formData, setFormData] = useState<CreateByThemeRequest>({
@@ -58,7 +63,7 @@ export default function CreativeChef() {
     setFormData(prev => ({ ...prev, creativity: Number(e.target.value) }));
   };
 
-  // Hàm xử lý submit form - GỌI API TRỰC TIẾP TẠI ĐÂY
+  // Hàm xử lý submit form
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.inspiration.trim()) return;
@@ -68,7 +73,6 @@ export default function CreativeChef() {
     setResult(null);
 
     try {
-      // Gọi service trực tiếp thay vì gọi prop onSubmit
       const data = await aiService.createByTheme(formData);
       setResult(data);
     } catch (err: any) {
@@ -78,6 +82,9 @@ export default function CreativeChef() {
       setLoading(false);
     }
   };
+
+  // Get current mood's persona for display
+  const currentMood = MOODS.find(m => m.id === formData.mood);
 
   // --- RENDER LOGIC ---
   if (loading) return <CinematicLoader />;
@@ -117,11 +124,19 @@ export default function CreativeChef() {
                 </div>
             </div>
 
-            {/* 2. ATMOSPHERE (Mood Film Strip) */}
+            {/* 2. ATMOSPHERE (Mood Film Strip) - UPDATED 8 MOODS */}
             <div className="mb-12">
-                <label className="block text-xs font-bold uppercase tracking-[0.3em] text-gray-500 mb-6 pl-2 border-l-4 border-amber-500">
-                    Không Khí & Tông Màu (Mood)
-                </label>
+                <div className="flex items-center justify-between mb-6">
+                    <label className="block text-xs font-bold uppercase tracking-[0.3em] text-gray-500 pl-2 border-l-4 border-amber-500">
+                        Không Khí & Phong Cách Kể Chuyện (Mood)
+                    </label>
+                    {currentMood && (
+                        <div className="text-xs text-gray-400 flex items-center gap-2">
+                            <span className="text-amber-500 font-bold">Persona:</span>
+                            <span className="font-mono">{currentMood.persona}</span>
+                        </div>
+                    )}
+                </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {MOODS.map((m) => (
@@ -144,9 +159,32 @@ export default function CreativeChef() {
                             <div className={`absolute bottom-2 left-0 w-full text-center text-xs font-bold uppercase tracking-wider ${formData.mood === m.id ? 'text-amber-500' : 'text-gray-300'}`}>
                                 {m.label}
                             </div>
+                            {/* Persona hint on hover */}
+                            <div className="absolute top-2 left-2 opacity-0 group-hover/btn:opacity-100 transition-opacity">
+                                <span className="text-[8px] bg-black/80 px-2 py-1 rounded text-gray-400 font-mono">
+                                    {m.persona}
+                                </span>
+                            </div>
                         </button>
                     ))}
                 </div>
+
+                {/* Persona Description */}
+                {currentMood && (
+                    <div className="mt-6 p-4 bg-black/20 border border-white/5 rounded-lg">
+                        <div className="flex items-start gap-3">
+                            <span className="text-2xl">{currentMood.icon}</span>
+                            <div className="flex-1">
+                                <div className="text-xs font-bold text-amber-500 uppercase tracking-wider mb-1">
+                                    {currentMood.persona}
+                                </div>
+                                <p className="text-xs text-gray-400 leading-relaxed">
+                                    {getPersonaDescription(currentMood.persona)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* 3. TECHNICAL SPECS (Dashboard) */}
@@ -265,7 +303,6 @@ export default function CreativeChef() {
                             </>
                         )}
                     </div>
-                    {/* Hover Glow */}
                     {!loading && <div className="absolute bottom-0 left-0 w-full h-1 bg-amber-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>}
                 </button>
             </div>
@@ -274,4 +311,22 @@ export default function CreativeChef() {
       </form>
     </div>
   );
+}
+
+// ============================================================================
+// HELPER FUNCTION - PERSONA DESCRIPTIONS
+// ============================================================================
+
+function getPersonaDescription(persona: string): string {
+  const descriptions: Record<string, string> = {
+    'Comic Mode': 'Giọng điệu vui nhộn như Deadpool nấu ăn. Phá vỡ bức tường thứ 4, châm biếm, chơi chữ.',
+    'Action Rush': 'Như Gordon Ramsay hoặc Fast & Furious. Câu ngắn, súc tích, động từ mạnh. Tạo cảm giác khẩn cấp!',
+    'Romance Mood': 'Phong cách K-Drama, ngọt ngào, lãng mạn. So sánh hương vị như tình yêu - ngọt đắng cay nồng.',
+    'Drama Deep': 'Như Parasite hay The Godfather. Triết lý sâu sắc, món ăn là ẩn dụ cuộc đời.',
+    'Horror Night': 'Gothic, rùng rợn nhưng hấp dẫn. Ẩn dụ tối tăm, tiếng động đáng sợ, như Silence of the Lambs.',
+    'Chef\'s Table': 'Phong cách tài liệu Netflix. Tôn trọng nghệ thuật, kỹ thuật, nguồn gốc nguyên liệu, tâm huyết.',
+    'Anime Feast': 'Như Food Wars/Shokugeki! Phóng đại, hiệu ứng ánh sáng, "foodgasm", quần áo bay!',
+    'Travel Discovery': 'Phong cách Anthony Bourdain. Kể chuyện văn hóa, lịch sử, con người đằng sau món ăn.',
+  };
+  return descriptions[persona] || 'Phong cách kể chuyện độc đáo.';
 }
