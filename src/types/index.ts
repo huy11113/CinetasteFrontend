@@ -204,3 +204,21 @@ export interface CreateByThemeResponse {
   
   origin: string;
 }
+// ============================================================================
+// 4. AI JUDGE / CRITIQUE TYPES (Giám khảo chấm điểm)
+// ============================================================================
+
+export interface CritiqueDishResponse {
+  critique: string;       // Lời nhận xét chi tiết
+  score: number;          // Điểm tổng (0-10)
+  
+  // Điểm thành phần
+  appearance_score: number;
+  technique_score: number;
+  creativity_score: number;
+  
+  // Danh sách ý chính
+  strengths: string[];
+  weaknesses: string[];
+  suggestions: string[];
+}

@@ -10,7 +10,7 @@ interface AITabsProps {
 const tabs: { id: 'analyze' | 'create' | 'chat' | 'mentor'; label: string; icon: LucideIcon }[] = [
   { id: 'analyze', label: 'Phân Tích Món', icon: ScanSearch },
   { id: 'create', label: 'Sáng Tạo', icon: Wand2 },
-  { id: 'chat', label: 'Trò Chuyện', icon: MessageSquare },
+  
   { id: 'mentor', label: 'Giám Khảo', icon: GraduationCap },
 ];
 

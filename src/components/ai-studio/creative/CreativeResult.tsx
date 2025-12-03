@@ -25,7 +25,7 @@ const FlavorChart = ({ data, color }) => {
   const maxRadius = 90;
   const levels = 5;
   
-  const getPoint = (index, value) => {
+  const getPoint = (index:number, value:number) => {
     const angle = (Math.PI * 2 * index) / flavors.length - Math.PI / 2;
     const radius = (value / 10) * maxRadius;
     return {
@@ -257,57 +257,6 @@ const getEffectiveColors = (data) => {
     if (validColors.length >= 2) return validColors;
   }
   return getFallbackColors(data.narrativeStyle);
-};
-
-// ============================================================================
-// MOCK DATA - UPDATED
-// ============================================================================
-
-const mockData = {
-  narrativeStyle: 'Anime Feast',
-  recipeName: 'Ramen Bão Lửa Shokugeki',
-  prepTime: '30 phút',
-  cookTime: '2 giờ',
-  connection: 'Một tô ramen không chỉ là món ăn - đó là chiến trường, là nghệ thuật, là linh hồn của đầu bếp!',
-  story: 'Trong căn bếp nóng bỏng của học viện Totsuki, tiếng nước sôi vang lên như lời tuyên chiến. Đây không phải ramen thường - đây là vũ khí tối thượng! Mỗi sợi mì được kéo với độ chính xác nano-mét, nước dùng sôi ở 98.5°C - nhiệt độ hoàn hảo để giải phóng umami. Khi bạn nâng đũa lên, ánh sáng vàng óng bao trùm, mùi thơm bùng nổ khiến quần áo bay! TASTE THE POWER!',
-  ingredients: [
-    '400g mì ramen tươi cao cấp',
-    '1.5L nước dùng heo + gà (ninh 12 giờ)',
-    '200g thịt xá xíu đặc biệt',
-    '2 quả trứng lòng đào hảo hạng',
-    '100g măng tươi',
-    '50g mộc nhĩ đen',
-    '30g hành lá thái mỏng',
-    'Tương miso đỏ 2 muống',
-    'Dầu ớt cay nồng (tự chế)',
-    'Nori, mè rang'
-  ],
-  instructions: [
-    'CHUẨN BỊ! Ninh xương heo + gà với gừng, hành trong 12 giờ. Nước dùng phải TRONG VEO như pha lê!',
-    'KÍCH HOẠT! Đun sôi nước dùng ở 98.5°C - nhiệt độ vàng để umami BÙNG NỔ!',
-    'PHÁ! Luộc mì đúng 2 phút 30 giây. MỘT GIÂY SAI = THẤT BẠI!',
-    'CHIẾN ĐẤU! Xếp mì vào tô, rưới nước dùng theo góc 45 độ tạo xoáy!',
-    'TUYỆT CHIÊU! Đặt xá xíu hình quạt, trứng lòng đào giữa, măng + mộc nhĩ hai bên!',
-    'HẬU KỲ! Rắc hành lá, nori, mè - TẠO HIỆU ỨNG ÁNH SÁNG!',
-    'FOODGASM READY! Phục vụ ngay khi còn 85°C - NHIỆT ĐỘ HOÀN HẢO!'
-  ],
-  platingGuide: 'Tô ramen như sân khấu! Trứng lòng đào - ngôi sao chính giữa, xá xíu xếp hình cánh quạt tạo động thái, măng + mộc nhĩ hai bên cân bằng âm dương. Ánh nước dùng trong veo phản chiếu ánh đèn - khoảnh khắc này phải EPIC như anime opening!',
-  pairing: 'Trà lạnh Nhật Bản hoặc Ramune soda',
-  flavorProfile: {
-    'Ngọt': 6,
-    'Chua': 3,
-    'Cay': 8,
-    'Umami': 10,
-    'Béo': 9
-  },
-  macros: {
-    calories: '680',
-    protein: '35g',
-    carbs: '72g',
-    fat: '28g'
-  },
-  musicRecommendation: 'Shokugeki no Soma - Spice',
-  visualColors: ['#ff6b35', '#f7b731', '#5f27cd']
 };
 
 // ============================================================================
