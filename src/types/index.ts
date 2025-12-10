@@ -41,16 +41,18 @@ export interface RecipeSummary {
 }
 
 // Các type con cho chi tiết công thức
+//
 export interface RecipeIngredientDetail {
   name: string;
-  quantityUnit: string; // Ví dụ: "200g"
+  quantityUnit: string; // Backend trả về chuỗi gộp, VD: "200g"
   isOptional: boolean;
 }
 
+//
 export interface RecipeStepDetail {
-  step: number;
-  title: string;
-  description: string;
+  step: number;        // Backend: step
+  title: string;       // Backend: title (VD: "Bước 1")
+  description: string; // Backend: description (Nội dung hướng dẫn)
   imageUrl: string | null;
 }
 
@@ -66,11 +68,12 @@ export interface RecipeMovieInfo {
   posterUrl: string | null;
 }
 
-// Type chi tiết đầy đủ (Detail view)
-export interface RecipeDetail extends Omit<RecipeSummary, 'authorId' | 'movieTitle'> {
+// [SỬA LẠI]: Đổi tên từ RecipeDetail -> Recipe để khớp với import trong component
+//
+export interface Recipe extends Omit<RecipeSummary, 'authorId' | 'movieTitle'> {
   ingredients: RecipeIngredientDetail[];
-  instructions: RecipeStepDetail[];
-  nutrition: Record<string, string>; // Map<String, String> từ Java
+  instructions: RecipeStepDetail[]; // Backend trả về list 'instructions'
+  nutrition: Record<string, string>; // Backend trả về Map<String, String>
   author: RecipeAuthor;
   movie: RecipeMovieInfo | null;
 }
@@ -137,6 +140,7 @@ export interface AnalyzeDishResponse {
   health_tags: string[];
   tips: string[];
 }
+
 // ============================================================================
 // 3. AI CREATIVE CHEF TYPES (Cập nhật cho khớp Backend mới)
 // ============================================================================
@@ -204,13 +208,14 @@ export interface CreateByThemeResponse {
   
   origin: string;
 }
+
 // ============================================================================
 // 4. AI JUDGE / CRITIQUE TYPES (Giám khảo chấm điểm)
 // ============================================================================
 
 export interface CritiqueDishResponse {
   critique: string;       // Lời nhận xét chi tiết
-  score: number;          // Điểm tổng (0-10)
+  score: number;          // Điểm tổng (0-100)
   
   // Điểm thành phần
   appearance_score: number;

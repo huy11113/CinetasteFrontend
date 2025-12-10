@@ -1,262 +1,275 @@
-// src/pages/EditProfile.tsx
-import { useState } from 'react';
-import { Camera, User, MapPin, Link as LinkIcon, Save, X } from 'lucide-react';
-import Button from '../components/ui/Button';
-import ThemeSwitcher from '../components/ThemeSwitcher'; // THÊM MỚI
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Save, X, Camera, User, FileText, 
+  ChevronLeft, Loader2, Clapperboard,
+  Utensils, Film, ChefHat
+} from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+import { userService } from '../services/userService';
+import toast from 'react-hot-toast';
 
 export default function EditProfile() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
-    name: 'Chef Auguste',
-    username: 'chef_auguste',
-    bio: 'Passionate about recreating iconic movie dishes. Master chef and cinema enthusiast. Sharing culinary stories one recipe at a time.',
-    location: 'Paris, France',
-    website: 'https://chefauguste.com',
+    displayName: '',
+    bio: '',
+    username: '', 
+    profileImageUrl: ''
   });
 
-  const [avatarPreview, setAvatarPreview] = useState('https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=400');
-  const [bannerPreview, setBannerPreview] = useState('https://images.pexels.com/photos/3184192/pexels-photo-3184192.jpeg?auto=compress&cs=tinysrgb&w=1920');
+  useEffect(() => {
+    const fetchCurrentData = async () => {
+      if (!user?.userId) return;
+      try {
+        setIsLoading(true);
+        const data = await userService.getUserProfile(user.userId);
+        setFormData({
+          displayName: data.displayName || '',
+          bio: data.bio || '',
+          username: data.username || user.username || '',
+          profileImageUrl: data.avatarUrl || ''
+        });
+        setPreviewImage(data.avatarUrl || null);
+      } catch (error) {
+        toast.error("Không thể tải thông tin");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCurrentData();
+  }, [user]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewImage(objectUrl);
+    toast.success("Đã chọn ảnh (Preview)");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Profile updated:', formData);
+    if (!user?.userId) return;
+
+    try {
+      setIsSaving(true);
+      await userService.updateUserProfile(user.userId, {
+        displayName: formData.displayName,
+        bio: formData.bio,
+        profileImageUrl: formData.profileImageUrl
+      });
+
+      toast.custom((t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#1A1A1E] border border-[#D4AF37] shadow-2xl rounded-lg pointer-events-auto flex items-center p-4`}>
+          <div className="bg-[#D4AF37] p-2 rounded-full mr-4">
+            <Clapperboard className="h-6 w-6 text-black" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-white uppercase tracking-wider">Cắt! Hoàn hảo.</p>
+            <p className="mt-1 text-xs text-gray-400">Hồ sơ đã được lưu vào cuộn phim.</p>
+          </div>
+        </div>
+      ));
+      
+      setTimeout(() => navigate('/profile'), 1200);
+    } catch (error) {
+      toast.error("Lỗi khi lưu thay đổi.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleImageUpload = (type: 'avatar' | 'banner') => {
-    console.log(`Upload ${type}`);
-  };
+  if (!user) return null;
 
   return (
-    <div className="min-h-screen pt-20 pb-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-display font-bold text-white mb-2">Edit Profile</h1>
-          <p className="text-gray-400">Update your profile information and preferences</p>
+    <div className="min-h-screen bg-[#0a0a0a] text-[#EAEAEA] font-sans flex items-center justify-center p-4 relative overflow-hidden">
+      
+      {/* Background Texture (Màn chiếu) */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.05]"></div>
+      <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/80 via-transparent to-black/80 pointer-events-none"></div>
+
+      {/* ================= FILM STRIP CONTAINER ================= */}
+      <div className="relative z-10 w-full max-w-2xl animate-slide-up">
+        
+        {/* Header Label */}
+        <div className="text-center mb-8">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#D4AF37] text-black font-bold text-xs uppercase tracking-[0.3em] rounded-sm transform -rotate-2 shadow-[0_0_15px_rgba(212,175,55,0.4)]">
+            <Film className="w-3 h-3" /> Casting Profile
+          </span>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          <div className="bg-cinematic-gray rounded-xl border border-gray-800 overflow-hidden">
-            <div className="relative h-48 group">
-              <img
-                src={bannerPreview}
-                alt="Banner"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={() => handleImageUpload('banner')}
-                >
-                  <Camera className="w-4 h-4 mr-2" />
-                  Change Banner
-                </Button>
-              </div>
-            </div>
+        {/* --- MAIN FILM STRIP --- */}
+        <div className="flex bg-[#111] shadow-2xl overflow-hidden rounded-lg">
+          
+          {/* SPROCKET HOLES (LEFT) */}
+          <div className="w-12 bg-[#050505] border-r border-[#222] flex flex-col items-center py-4 gap-6 relative z-20">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="w-6 h-4 bg-[#222] rounded-[2px] shadow-inner"></div>
+            ))}
+          </div>
 
-            <div className="relative px-8 pb-8">
-              <div className="relative -mt-20 mb-6 w-40 h-40 group">
-                <img
-                  src={avatarPreview}
-                  alt="Avatar"
-                  className="w-full h-full rounded-full border-4 border-cinematic-gray object-cover"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleImageUpload('avatar')}
-                  className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                >
-                  <Camera className="w-8 h-8 text-white" />
+          {/* CONTENT AREA (CENTER) */}
+          <div className="flex-1 bg-[#141414] relative">
+            
+            {/* Film Frame Lines */}
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-[#333]"></div>
+            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#333]"></div>
+
+            {/* FORM BODY */}
+            <div className="p-8 md:p-12">
+              
+              <div className="flex justify-between items-start mb-10 border-b border-white/5 pb-4">
+                <div>
+                  <h2 className="text-3xl font-bold text-white font-display uppercase tracking-tight">
+                    Hồ Sơ Đầu Bếp
+                  </h2>
+                  <p className="text-[#D4AF37] text-xs uppercase tracking-widest mt-1 font-mono">
+                    Scene 1 • Take 1 • @{formData.username}
+                  </p>
+                </div>
+                <button onClick={() => navigate('/profile')} className="text-gray-500 hover:text-white transition-colors">
+                  <X className="w-6 h-6" />
                 </button>
               </div>
 
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      <User className="w-4 h-4 inline mr-1" />
-                      Display Name
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="input-field"
-                      required
-                    />
+              {isLoading ? (
+                <div className="py-20 text-center">
+                  <Loader2 className="w-8 h-8 text-[#D4AF37] animate-spin mx-auto mb-2" />
+                  <p className="text-xs uppercase tracking-widest text-gray-500">Đang tráng phim...</p>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-10">
+                  
+                  {/* --- SCENE 1: THE STAR (AVATAR) --- */}
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                      
+                      {/* Frame viền phim cho Avatar */}
+                      <div className="absolute -inset-4 border-2 border-[#D4AF37]/20 rounded-full animate-[spin_30s_linear_infinite]">
+                         {/* Các chấm nhỏ trên vòng tròn */}
+                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
+                         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
+                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
+                         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
+                      </div>
+
+                      <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-[#1A1A1E] shadow-[0_0_30px_rgba(0,0,0,0.8)] relative z-10 bg-black">
+                        <img 
+                          src={previewImage || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`} 
+                          alt="Profile"
+                          className="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[1px]">
+                          <Camera className="w-6 h-6 text-[#D4AF37] mb-1" />
+                          <span className="text-[9px] text-white font-bold uppercase">Edit Cut</span>
+                        </div>
+                      </div>
+
+                      {/* Icon trang trí */}
+                      <div className="absolute bottom-0 right-0 bg-[#D4AF37] p-2 rounded-full border-4 border-[#141414] z-20">
+                        <ChefHat className="w-4 h-4 text-black" />
+                      </div>
+                    </div>
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Username
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">@</span>
-                      <input
-                        type="text"
-                        value={formData.username}
-                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                        className="input-field pl-8"
-                        required
+                  {/* --- SCENE 2: THE SCRIPT (INPUTS) --- */}
+                  <div className="space-y-8">
+                    
+                    {/* Input: Display Name */}
+                    <div className="group relative">
+                      <label className="absolute -top-3 left-0 text-[10px] font-bold text-[#D4AF37] bg-[#141414] px-2 uppercase tracking-widest flex items-center gap-1">
+                        <User className="w-3 h-3" /> Nhân Vật Chính (Tên)
+                      </label>
+                      <input 
+                        type="text" 
+                        name="displayName"
+                        value={formData.displayName}
+                        onChange={handleChange}
+                        className="w-full bg-transparent border-2 border-[#333] rounded-sm px-4 py-4 text-white text-lg font-medium focus:border-[#D4AF37] focus:outline-none transition-all placeholder-gray-700"
+                        placeholder="VD: Chef Remy"
                       />
                     </div>
-                  </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Bio
-                  </label>
-                  <textarea
-                    value={formData.bio}
-                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                    className="input-field min-h-[120px] resize-none"
-                    placeholder="Tell us about yourself..."
-                    maxLength={200}
-                  />
-                  <p className="text-sm text-gray-500 mt-1 text-right">
-                    {formData.bio.length}/200 characters
-                  </p>
-                </div>
+                    {/* Input: Bio */}
+                    <div className="group relative">
+                      <label className="absolute -top-3 left-0 text-[10px] font-bold text-[#D4AF37] bg-[#141414] px-2 uppercase tracking-widest flex items-center gap-1">
+                        <FileText className="w-3 h-3" /> Kịch Bản (Tiểu Sử)
+                      </label>
+                      <div className="relative">
+                        <textarea 
+                          name="bio"
+                          value={formData.bio}
+                          onChange={handleChange}
+                          rows={4}
+                          className="w-full bg-transparent border-2 border-[#333] rounded-sm px-4 py-4 text-gray-300 focus:border-[#D4AF37] focus:outline-none transition-all resize-none text-sm leading-relaxed placeholder-gray-700"
+                          placeholder="Mô tả phong cách nấu nướng của bạn..."
+                        />
+                        <Utensils className="absolute bottom-3 right-3 w-4 h-4 text-[#333] group-focus-within:text-[#D4AF37] transition-colors" />
+                      </div>
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      <MapPin className="w-4 h-4 inline mr-1" />
-                      Location
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.location}
-                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      className="input-field"
-                      placeholder="City, Country"
-                    />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      <LinkIcon className="w-4 h-4 inline mr-1" />
-                      Website
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.website}
-                      onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                      className="input-field"
-                      placeholder="https://yourwebsite.com"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* THÊM MỚI: Theme Switcher */}
-          <ThemeSwitcher />
-
-          <div className="bg-cinematic-gray rounded-xl border border-gray-800 p-6">
-            <h3 className="text-xl font-semibold text-white mb-4">Taste Preferences</h3>
-            <p className="text-gray-400 text-sm mb-4">
-              Help us recommend recipes that match your preferences
-            </p>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
-                  Dietary Restrictions
-                </label>
-                <div className="flex flex-wrap gap-3">
-                  {['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free'].map((diet) => (
-                    <label
-                      key={diet}
-                      className="flex items-center px-4 py-2 bg-cinematic-gray-light rounded-lg cursor-pointer hover:bg-cinematic-gray border border-gray-700 hover:border-cinematic-accent transition-colors"
+                  {/* --- FINALE: ACTIONS --- */}
+                  <div className="flex items-center gap-4 pt-6 border-t border-[#333] border-dashed">
+                    <button 
+                      type="button"
+                      onClick={() => navigate('/profile')}
+                      className="px-6 py-3 border border-[#333] text-gray-400 hover:text-white hover:border-white transition-all uppercase text-xs font-bold tracking-widest rounded-sm"
                     >
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 rounded bg-cinematic-gray-light border-gray-600 text-cinematic-accent focus:ring-cinematic-accent mr-2"
-                      />
-                      <span className="text-sm text-gray-300">{diet}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
-                  Favorite Cuisines
-                </label>
-                <div className="flex flex-wrap gap-3">
-                  {['Italian', 'French', 'Japanese', 'Mexican', 'Indian', 'Chinese'].map((cuisine) => (
-                    <label
-                      key={cuisine}
-                      className="flex items-center px-4 py-2 bg-cinematic-gray-light rounded-lg cursor-pointer hover:bg-cinematic-gray border border-gray-700 hover:border-cinematic-accent transition-colors"
+                      Hủy Bỏ
+                    </button>
+                    
+                    <button 
+                      type="submit"
+                      disabled={isSaving}
+                      className="flex-1 px-6 py-3 bg-[#D4AF37] hover:bg-[#F2C94C] text-black font-bold uppercase text-xs tracking-widest rounded-sm shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2 group/btn"
                     >
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 rounded bg-cinematic-gray-light border-gray-600 text-cinematic-accent focus:ring-cinematic-accent mr-2"
-                      />
-                      <span className="text-sm text-gray-300">{cuisine}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
+                      {isSaving ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" /> Đang Lưu...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4" /> Lưu Vào Phim
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                </form>
+              )}
             </div>
           </div>
 
-          <div className="bg-cinematic-gray rounded-xl border border-gray-800 p-6">
-            <h3 className="text-xl font-semibold text-white mb-4">Privacy Settings</h3>
-
-            <div className="space-y-4">
-              <label className="flex items-center justify-between cursor-pointer">
-                <div>
-                  <p className="text-white font-medium">Public Profile</p>
-                  <p className="text-sm text-gray-400">Allow others to view your profile</p>
-                </div>
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-12 h-6 rounded-full bg-cinematic-gray-light border-gray-600 text-cinematic-accent focus:ring-cinematic-accent"
-                />
-              </label>
-
-              <label className="flex items-center justify-between cursor-pointer">
-                <div>
-                  <p className="text-white font-medium">Show Email</p>
-                  <p className="text-sm text-gray-400">Display your email on your profile</p>
-                </div>
-                <input
-                  type="checkbox"
-                  className="w-12 h-6 rounded-full bg-cinematic-gray-light border-gray-600 text-cinematic-accent focus:ring-cinematic-accent"
-                />
-              </label>
-
-              <label className="flex items-center justify-between cursor-pointer">
-                <div>
-                  <p className="text-white font-medium">Recipe Notifications</p>
-                  <p className="text-sm text-gray-400">Get notified about new recipes and comments</p>
-                </div>
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-12 h-6 rounded-full bg-cinematic-gray-light border-gray-600 text-cinematic-accent focus:ring-cinematic-accent"
-                />
-              </label>
-            </div>
+          {/* SPROCKET HOLES (RIGHT) */}
+          <div className="w-12 bg-[#050505] border-l border-[#222] flex flex-col items-center py-4 gap-6 relative z-20">
+            {[...Array(12)].map((_, i) => (
+              <div key={i} className="w-6 h-4 bg-[#222] rounded-[2px] shadow-inner"></div>
+            ))}
           </div>
 
-          <div className="flex items-center justify-end space-x-4">
-            <a href="/profile">
-              <Button variant="secondary" type="button">
-                <X className="w-4 h-4 mr-2" />
-                Cancel
-              </Button>
-            </a>
-            <Button type="submit">
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
-        </form>
+        </div>
+        
+        {/* Footer Note */}
+        <div className="text-center mt-6 text-[#333] text-[10px] uppercase tracking-[0.2em] font-mono">
+          Cinetaste Studios • Est. 2024
+        </div>
+
       </div>
     </div>
   );

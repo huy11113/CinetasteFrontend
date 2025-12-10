@@ -3,14 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { 
   Clock, ChefHat, Flame, Star, Share2, 
   Bookmark, Heart, Printer, Wand2, ChevronLeft, 
-  Check, PlayCircle, Sparkles, Lightbulb
+  Check, PlayCircle, Sparkles, Lightbulb,
+  Utensils, Calendar
 } from 'lucide-react';
 import { recipeService } from '../services/recipeService';
 import { Recipe } from '../types';
 import toast from 'react-hot-toast';
 
-// --- CONFIG: BẢNG MAP ICON CHO FRONTEND ---
-// Tự động gắn Emoji dựa trên key nhận được từ Backend
+// --- CONFIG: BẢNG MAP ICON ---
 const NUTRITION_MAP: Record<string, { emoji: string; label: string }> = {
   calories: { emoji: "🔥", label: "Calories" },
   kcal: { emoji: "🔥", label: "Kcal" },
@@ -25,7 +25,8 @@ const NUTRITION_MAP: Record<string, { emoji: string; label: string }> = {
 export default function RecipeDetail() {
   const { id } = useParams();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions' | 'nutrition' | 'reviews'>('ingredients');
+  // Thay đổi tab mặc định sang 'instructions' để người dùng thấy cách làm ngay
+  const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions' | 'nutrition' | 'reviews'>('instructions');
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
 
@@ -34,8 +35,9 @@ export default function RecipeDetail() {
       if (!id) return;
       try {
         const data = await recipeService.getRecipeById(id);
-        setRecipe(data);
+        setRecipe(data as unknown as Recipe);
       } catch (error) {
+        console.error(error);
         toast.error("Không thể tải công thức");
       } finally {
         setLoading(false);
@@ -53,293 +55,343 @@ export default function RecipeDetail() {
 
   if (loading) return (
     <div className="min-h-screen bg-[#0E0E10] flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-16 h-16 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-[#D4AF37] animate-pulse font-medium">Đang chuẩn bị nguyên liệu...</p>
+      </div>
     </div>
   );
 
   if (!recipe) return (
-    <div className="min-h-screen bg-[#0E0E10] text-white flex flex-col items-center justify-center gap-4">
+    <div className="min-h-screen bg-[#0E0E10] text-white flex flex-col items-center justify-center gap-6">
+      <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center">
+        <Utensils className="w-10 h-10 text-gray-500" />
+      </div>
       <p className="text-xl text-[#A3A3A3]">Không tìm thấy công thức này</p>
-      <Link to="/" className="text-[#D4AF37] hover:underline">Quay về trang chủ</Link>
+      <Link to="/" className="px-6 py-2 bg-[#D4AF37] text-black font-bold rounded-full hover:bg-[#F2C94C] transition-colors">
+        Quay về trang chủ
+      </Link>
     </div>
   );
 
-  // Tính phần trăm hoàn thành nguyên liệu
   const progressPercent = recipe.ingredients ? (checkedIngredients.size / recipe.ingredients.length) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-[#0E0E10] text-[#EAEAEA] font-sans selection:bg-[#D4AF37] selection:text-black">
+    <div className="min-h-screen bg-[#0E0E10] text-[#EAEAEA] font-sans selection:bg-[#D4AF37] selection:text-black pb-20">
       
-      {/* 1. HERO SECTION (CINEMATIC HEADER) */}
-      <div className="relative h-[60vh] lg:h-[70vh] w-full overflow-hidden group">
-        <img 
-          src={recipe.mainImageUrl} 
-          alt={recipe.title} 
-          className="w-full h-full object-cover transform transition-transform duration-[3s] group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E10] via-[#0E0E10]/40 to-transparent" />
+      {/* ==================================================================
+          1. HEADER & HERO SECTION (Cải tiến: Thông tin rõ ràng hơn)
+      ================================================================== */}
+      <div className="relative h-[55vh] lg:h-[65vh] w-full group">
+        {/* Background Image with Parallax feel */}
+        <div className="absolute inset-0 overflow-hidden">
+          <img 
+            src={recipe.mainImageUrl} 
+            alt={recipe.title} 
+            className="w-full h-full object-cover transform transition-transform duration-[10s] group-hover:scale-110 filter brightness-[0.7]"
+          />
+          {/* Advanced Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-[#0E0E10]" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E10] via-[#0E0E10]/60 to-transparent" />
+        </div>
 
-        {/* Top Navigation */}
-        <div className="absolute top-6 left-4 right-4 lg:left-8 lg:right-8 flex justify-between items-center z-20">
-          <Link to="/" className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all border border-white/10 group">
-            <ChevronLeft className="w-6 h-6 text-white group-hover:-translate-x-1 transition-transform" />
+        {/* Navbar Actions */}
+        <div className="absolute top-6 left-0 right-0 px-6 lg:px-12 flex justify-between items-center z-50">
+          <Link to="/" className="group flex items-center gap-3 bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 hover:bg-white/10 transition-all">
+            <ChevronLeft className="w-5 h-5 text-white group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium text-white hidden sm:inline">Quay lại</span>
           </Link>
           <div className="flex gap-3">
-            {[Heart, Bookmark, Share2].map((Icon, idx) => (
-              <button key={idx} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-[#D4AF37] hover:text-black transition-all border border-white/10">
+            {[Heart, Share2].map((Icon, idx) => (
+              <button key={idx} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-[#D4AF37] hover:text-black hover:scale-110 transition-all border border-white/10">
                 <Icon className="w-5 h-5" />
               </button>
             ))}
           </div>
         </div>
 
-        {/* Title & Stats Card */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 lg:p-8 z-10 animate-fade-in-up">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 lg:p-8 relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[#D4AF37] to-[#B23A48]" />
+        {/* Hero Content */}
+        <div className="absolute bottom-0 left-0 right-0 px-6 lg:px-12 pb-12 z-40">
+          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-end justify-between gap-8">
+            <div className="flex-1 space-y-4">
+              {/* Movie Tag */}
+              {recipe.movie && (
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#D4AF37] text-black text-xs font-bold uppercase tracking-wider shadow-lg shadow-[#D4AF37]/20 mb-2 animate-fade-in-up">
+                  <PlayCircle className="w-3.5 h-3.5 fill-black" />
+                  {recipe.movie.title}
+                </div>
+              )}
               
-              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
-                <div>
-                  {recipe.movie && (
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#D4AF37]/20 border border-[#D4AF37]/30 text-[#D4AF37] text-xs font-bold uppercase tracking-wider mb-3">
-                      <PlayCircle className="w-3 h-3" />
-                      {recipe.movie.title}
-                    </div>
-                  )}
-                  <h1 className="text-3xl lg:text-5xl font-bold font-display text-white mb-2 leading-tight">
-                    {recipe.title}
-                  </h1>
-                  <p className="text-[#A3A3A3] line-clamp-2 max-w-2xl text-lg font-light">{recipe.summary}</p>
-                </div>
-
-                {/* Stats */}
-                <div className="flex flex-wrap gap-4 lg:gap-8 text-sm font-medium items-center">
+              <h1 className="text-4xl lg:text-6xl font-bold text-white leading-tight font-display drop-shadow-xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+                {recipe.title}
+              </h1>
+              
+              <div className="flex items-center gap-4 text-sm font-medium text-gray-300 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                {recipe.author && (
                   <div className="flex items-center gap-2">
-                    <Star className="w-6 h-6 text-[#D4AF37] fill-[#D4AF37]" />
-                    <div>
-                      <span className="text-white text-xl font-bold block leading-none">{recipe.avgRating || 0}</span>
-                      <span className="text-[#A3A3A3] text-xs">{recipe.ratingsCount || 0} reviews</span>
-                    </div>
+                    <img 
+                      src={recipe.author.avatarUrl || `https://ui-avatars.com/api/?name=${recipe.author.name}&background=random`}
+                      alt={recipe.author.name}
+                      className="w-8 h-8 rounded-full border border-white/20"
+                    />
+                    <span className="text-white">{recipe.author.name}</span>
                   </div>
-                  <div className="w-px h-8 bg-white/20 hidden lg:block" />
-                  <div className="flex items-center gap-3">
-                    <div className="flex flex-col items-center">
-                      <Clock className="w-5 h-5 text-[#D4AF37] mb-1" />
-                      <span className="text-[#EAEAEA]">{recipe.prepTimeMinutes + recipe.cookTimeMinutes}m</span>
-                    </div>
-                    <div className="flex flex-col items-center ml-4">
-                      <ChefHat className="w-5 h-5 text-[#D4AF37] mb-1" />
-                      <span className="text-[#EAEAEA]">
-                        {recipe.difficulty === 1 ? 'Dễ' : recipe.difficulty === 2 ? 'Vừa' : 'Khó'}
-                      </span>
-                    </div>
-                    {/* Calories (Nếu có) */}
-                    <div className="flex flex-col items-center ml-4">
-                      <Flame className="w-5 h-5 text-[#B23A48] mb-1" />
-                      <span className="text-[#EAEAEA]">kcal</span>
-                    </div>
-                  </div>
-                </div>
+                )}
+                <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
+                <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {new Date(recipe.createdAt).toLocaleDateString('vi-VN')}</span>
+              </div>
+            </div>
+
+            {/* Quick Stats Cards */}
+            <div className="flex gap-3 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <div className="bg-black/50 backdrop-blur-md border border-white/10 p-4 rounded-xl flex flex-col items-center min-w-[90px]">
+                <Clock className="w-6 h-6 text-[#D4AF37] mb-2" />
+                <span className="text-xs text-gray-400 uppercase">Thời gian</span>
+                <span className="font-bold text-white">{recipe.prepTimeMinutes + recipe.cookTimeMinutes}m</span>
+              </div>
+              <div className="bg-black/50 backdrop-blur-md border border-white/10 p-4 rounded-xl flex flex-col items-center min-w-[90px]">
+                <ChefHat className="w-6 h-6 text-[#D4AF37] mb-2" />
+                <span className="text-xs text-gray-400 uppercase">Độ khó</span>
+                <span className="font-bold text-white">
+                  {recipe.difficulty === 1 ? 'Dễ' : recipe.difficulty === 2 ? 'Vừa' : 'Khó'}
+                </span>
+              </div>
+              <div className="bg-black/50 backdrop-blur-md border border-white/10 p-4 rounded-xl flex flex-col items-center min-w-[90px]">
+                <Star className="w-6 h-6 text-[#D4AF37] fill-[#D4AF37] mb-2" />
+                <span className="text-xs text-gray-400 uppercase">Đánh giá</span>
+                <span className="font-bold text-white">{recipe.avgRating} <span className="text-xs font-normal text-gray-500">({recipe.ratingsCount})</span></span>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. CONTENT BODY */}
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      {/* ==================================================================
+          2. MAIN LAYOUT
+      ================================================================== */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           
-          {/* LEFT: Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Actions */}
-            <div className="flex gap-4">
-              <button className="flex-1 bg-gradient-to-r from-[#D4AF37] to-[#F2C94C] text-black font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all transform hover:-translate-y-1">
-                <Printer className="w-5 h-5" /> In Công Thức
-              </button>
-              <button className="flex-1 bg-white/5 border border-[#D4AF37]/50 text-[#D4AF37] font-bold py-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#D4AF37]/10 transition-all">
-                <Wand2 className="w-5 h-5" /> Tùy Chỉnh AI
-              </button>
+          {/* --- LEFT COLUMN (CONTENT - 8 CỘT) --- */}
+          <div className="lg:col-span-8 space-y-10">
+            
+            {/* Description */}
+            <div className="prose prose-invert max-w-none">
+              <p className="text-lg text-gray-300 leading-relaxed font-light border-l-4 border-[#D4AF37] pl-4 italic">
+                "{recipe.summary}"
+              </p>
             </div>
 
-            {/* Tabs & Content */}
-            <div className="bg-[#1A1A1E] rounded-2xl border border-white/5 overflow-hidden min-h-[600px]">
-              <div className="flex border-b border-white/5 bg-[#141416]">
+            {/* TAB NAVIGATION (Sticky Style) */}
+            <div className="sticky top-4 z-30 bg-[#0E0E10]/95 backdrop-blur-sm py-2 border-b border-white/10 mb-8">
+              <div className="flex gap-8 overflow-x-auto no-scrollbar">
                 {[
-                  { id: 'ingredients', label: 'Nguyên Liệu' },
                   { id: 'instructions', label: 'Cách Làm' },
+                  { id: 'ingredients', label: 'Nguyên Liệu' },
                   { id: 'nutrition', label: 'Dinh Dưỡng' },
                   { id: 'reviews', label: 'Đánh Giá' }
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex-1 py-5 text-sm font-bold tracking-wide transition-all relative ${
-                      activeTab === tab.id ? 'text-[#D4AF37]' : 'text-[#777] hover:text-white'
+                    className={`pb-3 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap ${
+                      activeTab === tab.id ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-white'
                     }`}
                   >
                     {tab.label}
                     {activeTab === tab.id && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent shadow-[0_-2px_10px_rgba(212,175,55,0.5)]" />
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#D4AF37] shadow-[0_-2px_10px_rgba(212,175,55,0.5)]" />
                     )}
                   </button>
                 ))}
               </div>
+            </div>
 
-              <div className="p-8">
-                {/* 1. Ingredients */}
-                {activeTab === 'ingredients' && (
-                  <div className="animate-fade-in">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-xl font-bold text-white">Thành phần</h3>
-                      <span className="text-[#D4AF37] font-mono text-sm">
-                        {checkedIngredients.size}/{recipe.ingredients?.length || 0} done
-                      </span>
+            {/* TAB CONTENTS */}
+            <div className="min-h-[400px]">
+              
+              {/* --- INSTRUCTIONS --- */}
+              {activeTab === 'instructions' && (
+                <div className="space-y-12 animate-fade-in">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-2xl font-bold text-white font-display">Hướng dẫn chi tiết</h3>
+                    <button className="text-sm flex items-center gap-2 text-[#D4AF37] hover:underline">
+                      <Printer className="w-4 h-4" /> In hướng dẫn
+                    </button>
+                  </div>
+                  
+                  <div className="relative border-l border-white/10 ml-6 md:ml-10 space-y-12 pb-4">
+                    {recipe.instructions?.map((step, idx) => (
+                      <div key={idx} className="relative pl-8 md:pl-12 group">
+                        {/* Step Number Bubble */}
+                        <div className="absolute -left-[21px] md:-left-[25px] top-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#1A1A1E] border-4 border-[#0E0E10] flex items-center justify-center z-10 group-hover:scale-110 transition-transform duration-300">
+                          <span className="text-[#D4AF37] font-bold text-lg">{step.step}</span>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <h4 className="text-xl font-bold text-white group-hover:text-[#D4AF37] transition-colors">
+                            Bước {step.step}
+                          </h4>
+                          <p className="text-gray-300 text-lg leading-8">
+                            {step.description}
+                          </p>
+                          
+                          {/* Image */}
+                          {step.imageUrl && (
+                            <div className="mt-4 rounded-xl overflow-hidden border border-white/10 shadow-lg max-w-xl">
+                              <img src={step.imageUrl} alt={`Bước ${step.step}`} className="w-full object-cover hover:scale-105 transition-transform duration-700" />
+                            </div>
+                          )}
+
+                          {/* Tip Box */}
+                          {idx % 3 === 0 && (
+                            <div className="mt-4 flex gap-4 bg-[#D4AF37]/5 p-4 rounded-xl border border-[#D4AF37]/20">
+                              <div className="p-2 bg-[#D4AF37]/10 rounded-full h-fit">
+                                <Lightbulb className="w-5 h-5 text-[#D4AF37]" />
+                              </div>
+                              <div>
+                                <h5 className="font-bold text-[#D4AF37] text-sm mb-1">Mẹo nhỏ từ bếp trưởng</h5>
+                                <p className="text-sm text-gray-400">Luôn nếm thử ở mỗi bước để đảm bảo gia vị được cân bằng hoàn hảo trước khi sang bước tiếp theo.</p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* --- INGREDIENTS --- */}
+              {activeTab === 'ingredients' && (
+                <div className="animate-fade-in">
+                  <div className="bg-[#1A1A1E] rounded-2xl p-6 lg:p-8 border border-white/5">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                      <div>
+                        <h3 className="text-2xl font-bold text-white font-display mb-1">Nguyên liệu cần chuẩn bị</h3>
+                        <p className="text-gray-400 text-sm">Khẩu phần cho <span className="text-white font-bold">{recipe.servings} người</span></p>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[#D4AF37] font-bold text-lg">
+                          {Math.round(progressPercent)}%
+                        </span>
+                        <div className="w-32 h-1.5 bg-gray-800 rounded-full mt-1 overflow-hidden">
+                          <div className="h-full bg-[#D4AF37] transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }} />
+                        </div>
+                      </div>
                     </div>
-                    {/* Progress */}
-                    <div className="h-1 bg-gray-800 rounded-full mb-8 overflow-hidden">
-                      <div className="h-full bg-[#D4AF37] transition-all duration-500 ease-out" style={{ width: `${progressPercent}%` }} />
-                    </div>
-                    {/* List */}
-                    <div className="space-y-4">
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {recipe.ingredients?.map((ing, idx) => (
                         <div 
                           key={idx} 
                           onClick={() => toggleIngredient(idx)}
-                          className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer group ${
+                          className={`flex items-start gap-4 p-4 rounded-xl border cursor-pointer transition-all duration-200 select-none ${
                             checkedIngredients.has(idx) 
-                              ? 'bg-[#D4AF37]/5 border-[#D4AF37]/30' 
-                              : 'bg-white/5 border-white/5 hover:border-white/20'
+                              ? 'bg-[#D4AF37]/5 border-[#D4AF37]/30 opacity-70' 
+                              : 'bg-white/5 border-transparent hover:bg-white/10 hover:border-white/10'
                           }`}
                         >
-                          <div className={`w-6 h-6 rounded-full border flex items-center justify-center transition-colors ${
-                            checkedIngredients.has(idx) ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-[#A3A3A3] group-hover:border-[#D4AF37]'
+                          <div className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors flex-shrink-0 ${
+                            checkedIngredients.has(idx) ? 'bg-[#D4AF37] border-[#D4AF37]' : 'border-gray-500'
                           }`}>
-                            {checkedIngredients.has(idx) && <Check className="w-4 h-4 text-black" />}
+                            {checkedIngredients.has(idx) && <Check className="w-3.5 h-3.5 text-black" />}
                           </div>
-                          <div className={`flex-1 ${checkedIngredients.has(idx) ? 'line-through text-[#777]' : 'text-[#EAEAEA]'}`}>
-                            <span className="font-bold text-white">{ing.quantity} {ing.unit}</span> {ing.name}
+                          <div className={checkedIngredients.has(idx) ? 'line-through text-gray-500' : 'text-gray-200'}>
+                            <span className={`font-bold ${checkedIngredients.has(idx) ? 'text-gray-500' : 'text-white'}`}>
+                              {ing.quantityUnit}
+                            </span>
+                            {' '}{ing.name}
                           </div>
-                          {ing.notes && <span className="text-xs text-[#A3A3A3] italic">{ing.notes}</span>}
                         </div>
                       ))}
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* 2. Instructions */}
-                {activeTab === 'instructions' && (
-                  <div className="space-y-10 animate-fade-in">
-                    {recipe.instructions?.map((step, idx) => (
-                      <div key={idx} className="flex gap-6 group">
-                         <div className="flex flex-col items-center">
-                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#B23A48] text-white font-bold text-lg flex items-center justify-center shadow-lg z-10 border-4 border-[#1A1A1E]">
-                              {step.stepOrder}
-                            </div>
-                            {idx !== (recipe.instructions?.length || 0) - 1 && (
-                              <div className="w-0.5 flex-1 bg-white/10 my-2 group-hover:bg-[#D4AF37]/30 transition-colors" />
-                            )}
-                         </div>
-                         <div className="flex-1 pb-4">
-                            <div className="bg-white/5 p-6 rounded-2xl border border-white/5 hover:border-[#D4AF37]/30 transition-all hover:bg-white/10">
-                               <div className="flex justify-between items-start mb-3">
-                                  <h4 className="font-bold text-lg text-white">Bước {step.stepOrder}</h4>
-                                  <span className="text-xs flex items-center gap-1 text-[#A3A3A3] bg-black/30 px-2 py-1 rounded border border-white/5">
-                                    <Clock className="w-3 h-3" /> {step.durationMinutes || 0}m
-                                  </span>
-                               </div>
-                               <p className="text-[#EAEAEA] leading-relaxed text-lg">{step.instructions}</p>
-                               {/* Hint Box mẫu */}
-                               {idx % 2 === 0 && (
-                                 <div className="mt-4 flex gap-3 bg-[#D4AF37]/5 p-4 rounded-lg border border-[#D4AF37]/20">
-                                   <Lightbulb className="w-5 h-5 text-[#D4AF37] flex-shrink-0 mt-0.5" />
-                                   <p className="text-sm text-[#D4AF37]/90">Mẹo: Hãy chú ý nhiệt độ để món ăn đạt hương vị chuẩn nhất.</p>
-                                 </div>
-                               )}
-                            </div>
-                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* 3. Nutrition (TỰ ĐỘNG MAP ICON TỪ BACKEND CŨ) */}
-                {activeTab === 'nutrition' && (
-                  <div className="grid grid-cols-2 gap-4 animate-fade-in">
-                    {recipe.nutrition ? (
-                      // Xử lý Map từ Backend: Object.entries({key: value})
+              {/* --- NUTRITION --- */}
+              {activeTab === 'nutrition' && (
+                <div className="animate-fade-in">
+                  <h3 className="text-2xl font-bold text-white font-display mb-8">Giá trị dinh dưỡng</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {recipe.nutrition && Object.keys(recipe.nutrition).length > 0 ? (
                       Object.entries(recipe.nutrition).map(([key, value], idx) => {
                         const config = NUTRITION_MAP[key.toLowerCase()] || NUTRITION_MAP.default;
                         return (
-                          <div key={idx} className="bg-white/5 p-6 rounded-2xl border border-white/5 flex flex-col items-center text-center hover:bg-white/10 transition-colors">
-                            <span className="text-4xl mb-3">{config.emoji}</span>
-                            <span className="text-[#A3A3A3] text-xs uppercase tracking-wider mb-1 font-bold">{config.label || key}</span>
+                          <div key={idx} className="bg-[#1A1A1E] p-6 rounded-2xl border border-white/5 flex flex-col items-center text-center hover:border-[#D4AF37]/30 hover:-translate-y-1 transition-all duration-300">
+                            <span className="text-4xl mb-4 filter drop-shadow-lg">{config.emoji}</span>
+                            <span className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-2">{config.label || key}</span>
                             <span className="text-2xl font-bold text-[#D4AF37]">{String(value)}</span>
                           </div>
                         );
                       })
                     ) : (
-                      <div className="col-span-2 text-center text-gray-500 italic py-10">Chưa có thông tin dinh dưỡng</div>
+                      <div className="col-span-full py-12 text-center bg-[#1A1A1E] rounded-2xl border border-dashed border-white/10">
+                        <p className="text-gray-500">Chưa có thông tin dinh dưỡng cho món này.</p>
+                      </div>
                     )}
                   </div>
-                )}
-
-                {/* 4. Reviews */}
-                {activeTab === 'reviews' && (
-                  <div className="text-center py-12 animate-fade-in">
-                    <div className="text-6xl font-bold text-[#D4AF37] mb-2">{recipe.avgRating}</div>
-                    <div className="flex justify-center gap-1 text-[#D4AF37] mb-6">
-                      {[1,2,3,4,5].map(s => (
-                        <Star key={s} className={`w-6 h-6 ${s <= Math.round(recipe.avgRating) ? 'fill-current' : 'text-gray-600'}`} />
-                      ))}
-                    </div>
-                    <p className="text-[#A3A3A3]">Tính năng đánh giá chi tiết đang được phát triển.</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* RIGHT: Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="sticky top-24 space-y-6">
-              {/* AI Chef Card */}
-              <div className="bg-gradient-to-br from-[#1A1A1E] to-[#251A1C] p-6 rounded-2xl border border-[#D4AF37]/20 relative overflow-hidden group hover:border-[#D4AF37]/50 transition-colors">
-                <div className="absolute -top-4 -right-4 p-4 opacity-10 group-hover:opacity-20 transition-opacity rotate-12">
-                   <Sparkles className="w-32 h-32 text-[#D4AF37]" />
                 </div>
-                <div className="flex items-center gap-3 mb-4 relative z-10">
-                   <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#B23A48] flex items-center justify-center shadow-lg">
-                     <Wand2 className="w-6 h-6 text-white" />
-                   </div>
-                   <h3 className="font-bold text-xl text-white">AI Sous-Chef</h3>
-                </div>
-                <p className="text-[#A3A3A3] text-sm mb-6 relative z-10">
-                  Bạn muốn món này ít cay hơn, hoặc đổi sang nguyên liệu chay? Hãy để AI giúp bạn biến tấu công thức ngay lập tức.
-                </p>
-                <Link to="/ai-studio" className="relative z-10 block w-full py-3 bg-[#D4AF37] text-black font-bold text-center rounded-xl hover:bg-[#F2C94C] transition-all shadow-lg hover:shadow-[#D4AF37]/20">
-                   Thử Ngay
-                </Link>
-              </div>
+              )}
 
-              {/* Author Card */}
-              {recipe.author && (
-                <div className="bg-[#1A1A1E] p-6 rounded-2xl border border-white/5 flex items-center gap-4">
-                  <img 
-                    src={recipe.author.profileImageUrl || `https://ui-avatars.com/api/?name=${recipe.author.displayName}&background=random`} 
-                    alt={recipe.author.displayName}
-                    className="w-14 h-14 rounded-full border-2 border-[#D4AF37] p-0.5"
-                  />
-                  <div>
-                    <p className="text-xs text-[#A3A3A3] uppercase tracking-wider">Creator</p>
-                    <h4 className="text-white font-bold text-lg">{recipe.author.displayName}</h4>
+              {/* --- REVIEWS (Placeholder) --- */}
+              {activeTab === 'reviews' && (
+                <div className="animate-fade-in bg-[#1A1A1E] rounded-2xl p-8 border border-white/5 text-center py-16">
+                  <div className="inline-block p-4 rounded-full bg-white/5 mb-4">
+                    <Star className="w-12 h-12 text-[#D4AF37]" />
                   </div>
+                  <h3 className="text-2xl font-bold text-white mb-2">Đánh giá & Bình luận</h3>
+                  <p className="text-gray-400 mb-6">Tính năng cộng đồng đang được phát triển. Hãy quay lại sau nhé!</p>
+                  <button className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors font-medium">
+                    Viết đánh giá đầu tiên
+                  </button>
                 </div>
               )}
             </div>
           </div>
 
+          {/* --- RIGHT COLUMN (SIDEBAR - 4 CỘT) --- */}
+          <div className="lg:col-span-4 space-y-8">
+            
+            {/* AI Action Card - Highlighted */}
+            <div className="bg-gradient-to-br from-[#1A1A1E] to-black p-1 rounded-2xl relative group">
+              {/* Border Gradient Effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37] via-[#B23A48] to-[#D4AF37] rounded-2xl opacity-20 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
+              
+              <div className="bg-[#131315] p-6 rounded-xl relative h-full flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#D4AF37] to-[#B23A48] flex items-center justify-center shadow-lg shadow-[#D4AF37]/20 mb-4 animate-bounce-slow">
+                  <Wand2 className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="font-bold text-xl text-white mb-2 font-display">AI Sous-Chef</h3>
+                <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                  Bạn muốn món này ít cay hơn, chuyển sang món chay, hay thay đổi khẩu phần? AI sẽ giúp bạn viết lại công thức trong tích tắc.
+                </p>
+                <Link to="/ai-studio" className="w-full py-3 bg-[#D4AF37] text-black font-bold rounded-xl hover:bg-[#F2C94C] transition-all shadow-lg hover:shadow-[#D4AF37]/30 flex items-center justify-center gap-2">
+                  <Sparkles className="w-4 h-4" /> Biến tấu ngay
+                </Link>
+              </div>
+            </div>
+
+            {/* Ingredient Checklist Summary (Mini) */}
+            <div className="bg-[#1A1A1E] p-6 rounded-2xl border border-white/5">
+              <h4 className="font-bold text-white mb-4 flex items-center gap-2">
+                <Utensils className="w-4 h-4 text-[#D4AF37]" /> Công cụ
+              </h4>
+              <ul className="space-y-3 text-sm text-gray-400">
+                <li className="flex items-center gap-2 cursor-pointer hover:text-white">
+                  <Printer className="w-4 h-4" /> In bản rút gọn
+                </li>
+                <li className="flex items-center gap-2 cursor-pointer hover:text-white">
+                  <Share2 className="w-4 h-4" /> Chia sẻ với bạn bè
+                </li>
+                <li className="flex items-center gap-2 cursor-pointer hover:text-white">
+                  <Bookmark className="w-4 h-4" /> Lưu vào bộ sưu tập
+                </li>
+              </ul>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>

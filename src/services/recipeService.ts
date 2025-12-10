@@ -55,16 +55,16 @@ export const recipeService = {
    * Lấy danh sách công thức của một User cụ thể
    * Dùng cho: Trang cá nhân (Profile)
    */
+/**
+   * Lấy danh sách công thức của một User cụ thể
+   * API MỚI: /recipes/author/{authorId}
+   */
   getRecipesByUserId: async (userId: string, page = 0, size = 10) => {
     try {
-      // Lưu ý: Backend cần có endpoint này. 
-      // Nếu chưa có, bạn có thể dùng tạm getAllRecipes và lọc ở frontend (không khuyến khích)
-      // Hoặc gọi endpoint search nếu có.
-      // Tạm thời gọi endpoint chung và filter (giải pháp tạm thời nếu thiếu API)
-      const response = await apiClient.get('/recipes', {
-        params: { page, size, sort: 'createdAt,desc' } // Cần backend hỗ trợ filter param user_id
+   
+      const response = await apiClient.get(`/recipes/author/${userId}`, {
+        params: { page, size, sort: 'createdAt,desc' }
       });
-      // Nếu API hỗ trợ filter: params: { page, size, userId }
       return response.data;
     } catch (error) {
       console.error("Lỗi khi tải công thức của user:", error);
@@ -135,4 +135,5 @@ export const recipeService = {
       throw error;
     }
   }
+  
 };
