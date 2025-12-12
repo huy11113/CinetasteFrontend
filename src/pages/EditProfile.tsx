@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Save, X, Camera, User, FileText, 
-  ChevronLeft, Loader2, Clapperboard,
-  Utensils, Film, ChefHat
+  Loader2, Clapperboard, Film, Sparkles, Utensils, ChefHat, Upload
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { userService } from '../services/userService';
@@ -16,6 +15,8 @@ export default function EditProfile() {
   
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // State hiển thị ảnh
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -25,6 +26,7 @@ export default function EditProfile() {
     profileImageUrl: ''
   });
 
+  // Load dữ liệu
   useEffect(() => {
     const fetchCurrentData = async () => {
       if (!user?.userId) return;
@@ -35,7 +37,7 @@ export default function EditProfile() {
           displayName: data.displayName || '',
           bio: data.bio || '',
           username: data.username || user.username || '',
-          profileImageUrl: data.avatarUrl || ''
+          profileImageUrl: data.avatarUrl || '' // Lưu URL ảnh hiện tại
         });
         setPreviewImage(data.avatarUrl || null);
       } catch (error) {
@@ -47,35 +49,54 @@ export default function EditProfile() {
     fetchCurrentData();
   }, [user]);
 
+  // Xử lý thay đổi Text
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // --- LOGIC MỚI: XỬ LÝ ẢNH BASE64 ---
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewImage(objectUrl);
-    toast.success("Đã chọn ảnh (Preview)");
+
+    // 1. Giới hạn dung lượng (ví dụ < 1MB để tránh quá tải DB)
+    if (file.size > 1024 * 1024) {
+        toast.error("Ảnh quá lớn! Vui lòng chọn ảnh dưới 1MB.");
+        return;
+    }
+
+    // 2. Chuyển File thành Base64 String để gửi lên Backend
+    const reader = new FileReader();
+    reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setPreviewImage(base64String); // Hiện preview ngay
+        setFormData(prev => ({ ...prev, profileImageUrl: base64String })); // Lưu vào form data
+        toast.success("Đã tải ảnh lên");
+    };
+    reader.readAsDataURL(file);
   };
 
+  // Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.userId) return;
 
     try {
       setIsSaving(true);
+      
+      // Gọi API với đường dẫn /users/me đã sửa
       await userService.updateUserProfile(user.userId, {
         displayName: formData.displayName,
         bio: formData.bio,
-        profileImageUrl: formData.profileImageUrl
+        profileImageUrl: formData.profileImageUrl // Chuỗi Base64 hoặc URL cũ
       });
 
+      // Thông báo thành công
       toast.custom((t) => (
-        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#1A1A1E] border border-[#D4AF37] shadow-2xl rounded-lg pointer-events-auto flex items-center p-4`}>
-          <div className="bg-[#D4AF37] p-2 rounded-full mr-4">
-            <Clapperboard className="h-6 w-6 text-black" />
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#1A1A1E] border-l-4 border-[#D4AF37] shadow-2xl rounded-r-lg pointer-events-auto flex items-center p-4`}>
+          <div className="bg-[#D4AF37]/10 p-2 rounded-full mr-4">
+            <Clapperboard className="h-6 w-6 text-[#D4AF37]" />
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-white uppercase tracking-wider">Cắt! Hoàn hảo.</p>
@@ -84,8 +105,11 @@ export default function EditProfile() {
         </div>
       ));
       
-      setTimeout(() => navigate('/profile'), 1200);
+      // Chờ 1 chút rồi về trang Profile
+      setTimeout(() => navigate('/profile'), 1500);
+
     } catch (error) {
+      console.error(error);
       toast.error("Lỗi khi lưu thay đổi.");
     } finally {
       setIsSaving(false);
@@ -140,7 +164,11 @@ export default function EditProfile() {
                     Scene 1 • Take 1 • @{formData.username}
                   </p>
                 </div>
-                <button onClick={() => navigate('/profile')} className="text-gray-500 hover:text-white transition-colors">
+                <button 
+                  type="button"
+                  onClick={() => navigate('/profile')} 
+                  className="text-gray-500 hover:text-white transition-colors"
+                >
                   <X className="w-6 h-6" />
                 </button>
               </div>
@@ -153,17 +181,14 @@ export default function EditProfile() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-10">
                   
-                  {/* --- SCENE 1: THE STAR (AVATAR) --- */}
+                  {/* --- SCENE 1: THE STAR (AVATAR CLICKABLE) --- */}
                   <div className="flex flex-col items-center justify-center">
                     <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                       
                       {/* Frame viền phim cho Avatar */}
                       <div className="absolute -inset-4 border-2 border-[#D4AF37]/20 rounded-full animate-[spin_30s_linear_infinite]">
-                         {/* Các chấm nhỏ trên vòng tròn */}
                          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
-                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
-                         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
                       </div>
 
                       <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-[#1A1A1E] shadow-[0_0_30px_rgba(0,0,0,0.8)] relative z-10 bg-black">
@@ -172,17 +197,19 @@ export default function EditProfile() {
                           alt="Profile"
                           className="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-500 group-hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[1px]">
-                          <Camera className="w-6 h-6 text-[#D4AF37] mb-1" />
-                          <span className="text-[9px] text-white font-bold uppercase">Edit Cut</span>
+                        {/* Overlay: Upload Icon */}
+                        <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px]">
+                          <Upload className="w-6 h-6 text-[#D4AF37] mb-1 animate-bounce" />
+                          <span className="text-[9px] text-white font-bold uppercase">Đổi Ảnh</span>
                         </div>
                       </div>
 
                       {/* Icon trang trí */}
-                      <div className="absolute bottom-0 right-0 bg-[#D4AF37] p-2 rounded-full border-4 border-[#141414] z-20">
+                      <div className="absolute bottom-0 right-0 bg-[#D4AF37] p-2 rounded-full border-4 border-[#141414] z-20 shadow-lg">
                         <ChefHat className="w-4 h-4 text-black" />
                       </div>
                     </div>
+                    {/* Input file ẩn */}
                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                   </div>
 
@@ -199,7 +226,7 @@ export default function EditProfile() {
                         name="displayName"
                         value={formData.displayName}
                         onChange={handleChange}
-                        className="w-full bg-transparent border-2 border-[#333] rounded-sm px-4 py-4 text-white text-lg font-medium focus:border-[#D4AF37] focus:outline-none transition-all placeholder-gray-700"
+                        className="w-full bg-transparent border-2 border-[#333] rounded-sm px-4 py-4 text-white text-lg font-medium focus:border-[#D4AF37] focus:outline-none transition-all placeholder-gray-700 hover:border-[#444]"
                         placeholder="VD: Chef Remy"
                       />
                     </div>
@@ -215,7 +242,7 @@ export default function EditProfile() {
                           value={formData.bio}
                           onChange={handleChange}
                           rows={4}
-                          className="w-full bg-transparent border-2 border-[#333] rounded-sm px-4 py-4 text-gray-300 focus:border-[#D4AF37] focus:outline-none transition-all resize-none text-sm leading-relaxed placeholder-gray-700"
+                          className="w-full bg-transparent border-2 border-[#333] rounded-sm px-4 py-4 text-gray-300 focus:border-[#D4AF37] focus:outline-none transition-all resize-none text-sm leading-relaxed placeholder-gray-700 hover:border-[#444]"
                           placeholder="Mô tả phong cách nấu nướng của bạn..."
                         />
                         <Utensils className="absolute bottom-3 right-3 w-4 h-4 text-[#333] group-focus-within:text-[#D4AF37] transition-colors" />
@@ -237,7 +264,7 @@ export default function EditProfile() {
                     <button 
                       type="submit"
                       disabled={isSaving}
-                      className="flex-1 px-6 py-3 bg-[#D4AF37] hover:bg-[#F2C94C] text-black font-bold uppercase text-xs tracking-widest rounded-sm shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2 group/btn"
+                      className="flex-1 px-6 py-3 bg-[#D4AF37] hover:bg-[#F2C94C] text-black font-bold uppercase text-xs tracking-widest rounded-sm shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all flex items-center justify-center gap-2 group/btn disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isSaving ? (
                         <>

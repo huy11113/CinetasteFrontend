@@ -28,10 +28,12 @@ export const userService = {
     }
   },
   // --- THÊM HÀM MỚI ---
+ // --- SỬA LẠI HÀM NÀY ---
   updateUserProfile: async (userId: string, data: UpdateProfileRequest): Promise<UserProfileStats> => {
     try {
-      // Gọi API: PUT /users/{userId}
-      const response = await apiClient.put(`/users/${userId}`, data);
+      // QUAN TRỌNG: Đổi từ `/users/${userId}` thành `/users/me`
+      // API Gateway và User Service sẽ tự biết user là ai qua Token
+      const response = await apiClient.put(`/users/me`, data);
       return response.data;
     } catch (error) {
       console.error("Lỗi cập nhật profile:", error);
