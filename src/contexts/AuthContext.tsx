@@ -1,11 +1,9 @@
-
-   // src/contexts/AuthContext.tsx
+// src/contexts/AuthContext.tsx
 import { createContext, useState, useEffect, ReactNode } from 'react';
 import apiClient from '../services/apiClient';
 import { jwtDecode } from 'jwt-decode';
 import toast from 'react-hot-toast';
 
-// Interface User giữ nguyên
 export interface User {
   username: string;
   userId: string;
@@ -13,16 +11,12 @@ export interface User {
   profileImageUrl: string | null;
 }
 
-// --- THÊM 1: ĐỊNH NGHĨA LOGINRESPONSE (backend trả về) ---
-// (Bạn có thể chuyển cái này vào file /types/index.ts nếu muốn)
 export interface LoginResponse {
   token: string;
   username: string;
   displayName: string | null;
   profileImageUrl: string | null;
 }
-// ----------------------------------------------------
-
 
 export interface AuthContextType {
   user: User | null;
@@ -31,20 +25,17 @@ export interface AuthContextType {
   login: (loginIdentifier: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  // --- THÊM 2: HÀM MỚI CHO SOCIAL LOGIN ---
   handleSocialLogin: (loginResponse: LoginResponse) => void;
-  // -------------------------------------
+  refreshUserProfile: () => Promise<void>; // ✅ HÀM MỚI
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Helper: Lưu user vào localStorage
 const storeUserInLocalStorage = (token: string, user: User) => {
   localStorage.setItem('jwtToken', token);
   localStorage.setItem('cinetasteUser', JSON.stringify(user));
 };
 
-// Helper: Xóa user khỏi localStorage
 const removeUserFromLocalStorage = () => {
   localStorage.removeItem('jwtToken');
   localStorage.removeItem('cinetasteUser');
@@ -55,7 +46,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Hook useEffect giữ nguyên
   useEffect(() => {
     const storedToken = localStorage.getItem('jwtToken');
     const storedUser = localStorage.getItem('cinetasteUser'); 
@@ -79,9 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  // Hàm login cũ giữ nguyên
   const login = async (loginIdentifier: string, password: string) => {
-    
     const loginPromise = apiClient.post('/auth/login', {
       loginIdentifier,
       password,
@@ -90,10 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     toast.promise(loginPromise, {
       loading: 'Đang đăng nhập...',
       success: (response) => {
-        // --- SỬA 3: TÁI SỬ DỤNG HÀM MỚI ---
-        // response.data chính là LoginResponse
         handleSocialLogin(response.data); 
-        
         const { username, displayName } = response.data; 
         return `Chào mừng trở lại, ${displayName || username}!`;
       },
@@ -108,7 +93,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await loginPromise; 
   };
 
-  // Hàm register giữ nguyên
   const register = async (username: string, email: string, password: string) => {
     await apiClient.post('/auth/register', {
       username,
@@ -117,7 +101,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  // Hàm logout giữ nguyên
   const logout = () => {
     removeUserFromLocalStorage();
     setUser(null);
@@ -127,7 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = '/login'; 
   };
 
-  // --- THÊM 4: TRIỂN KHAI HÀM MỚI ---
   const handleSocialLogin = (loginResponse: LoginResponse) => {
     const { token, username, displayName, profileImageUrl } = loginResponse;
     const decodedToken = jwtDecode<{ sub: string; userId: string }>(token);
@@ -144,11 +126,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(token);
     apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   };
-  // ---------------------------------
 
+  // ✅ HÀM MỚI: Refresh thông tin user từ server
+  const refreshUserProfile = async () => {
+    try {
+      // Gọi API lấy thông tin user hiện tại
+      const response = await apiClient.get('/users/me/profile');
+      const { username, displayName, profileImageUrl, id } = response.data;
+      
+      // Cập nhật state và localStorage
+      const updatedUser: User = {
+        username,
+        userId: id,
+        displayName,
+        profileImageUrl,
+      };
+      
+      setUser(updatedUser);
+      
+      // Cập nhật localStorage (giữ nguyên token)
+      if (token) {
+        storeUserInLocalStorage(token, updatedUser);
+      }
+      
+      console.log('✅ User profile refreshed:', updatedUser);
+    } catch (error) {
+      console.error('❌ Failed to refresh user profile:', error);
+    }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout, handleSocialLogin }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      isLoading, 
+      login, 
+      register, 
+      logout, 
+      handleSocialLogin,
+      refreshUserProfile // ✅ Export hàm mới
+    }}>
       {!isLoading && children}
     </AuthContext.Provider>
   );

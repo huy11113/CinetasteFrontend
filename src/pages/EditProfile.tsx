@@ -2,21 +2,19 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Save, X, Camera, User, FileText, 
-  Loader2, Clapperboard, Film, Sparkles, Utensils, ChefHat, Upload
+  Loader2, Clapperboard, Film, Utensils, ChefHat, Upload
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { userService } from '../services/userService';
 import toast from 'react-hot-toast';
 
 export default function EditProfile() {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth(); // ✅ Lấy hàm refresh
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  
-  // State hiển thị ảnh
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -26,22 +24,23 @@ export default function EditProfile() {
     profileImageUrl: ''
   });
 
-  // Load dữ liệu
   useEffect(() => {
     const fetchCurrentData = async () => {
       if (!user?.userId) return;
       try {
         setIsLoading(true);
-        const data = await userService.getUserProfile(user.userId);
+        const data = await userService.getMyFullProfile();
+        
         setFormData({
           displayName: data.displayName || '',
           bio: data.bio || '',
           username: data.username || user.username || '',
-          profileImageUrl: data.avatarUrl || '' // Lưu URL ảnh hiện tại
+          profileImageUrl: data.profileImageUrl || ''
         });
-        setPreviewImage(data.avatarUrl || null);
+        setPreviewImage(data.profileImageUrl || null);
       } catch (error) {
         toast.error("Không thể tải thông tin");
+        console.error("Load profile error:", error);
       } finally {
         setIsLoading(false);
       }
@@ -49,35 +48,30 @@ export default function EditProfile() {
     fetchCurrentData();
   }, [user]);
 
-  // Xử lý thay đổi Text
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // --- LOGIC MỚI: XỬ LÝ ẢNH BASE64 ---
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // 1. Giới hạn dung lượng (ví dụ < 1MB để tránh quá tải DB)
     if (file.size > 1024 * 1024) {
         toast.error("Ảnh quá lớn! Vui lòng chọn ảnh dưới 1MB.");
         return;
     }
 
-    // 2. Chuyển File thành Base64 String để gửi lên Backend
     const reader = new FileReader();
     reader.onloadend = () => {
         const base64String = reader.result as string;
-        setPreviewImage(base64String); // Hiện preview ngay
-        setFormData(prev => ({ ...prev, profileImageUrl: base64String })); // Lưu vào form data
+        setPreviewImage(base64String);
+        setFormData(prev => ({ ...prev, profileImageUrl: base64String }));
         toast.success("Đã tải ảnh lên");
     };
     reader.readAsDataURL(file);
   };
 
-  // Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.userId) return;
@@ -85,14 +79,17 @@ export default function EditProfile() {
     try {
       setIsSaving(true);
       
-      // Gọi API với đường dẫn /users/me đã sửa
+      // 1. Gửi update lên server
       await userService.updateUserProfile(user.userId, {
         displayName: formData.displayName,
         bio: formData.bio,
-        profileImageUrl: formData.profileImageUrl // Chuỗi Base64 hoặc URL cũ
+        profileImageUrl: formData.profileImageUrl
       });
 
-      // Thông báo thành công
+      // ✅ 2. Refresh AuthContext để cập nhật localStorage + state
+      await refreshUserProfile();
+
+      // 3. Hiển thị thông báo
       toast.custom((t) => (
         <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-[#1A1A1E] border-l-4 border-[#D4AF37] shadow-2xl rounded-r-lg pointer-events-auto flex items-center p-4`}>
           <div className="bg-[#D4AF37]/10 p-2 rounded-full mr-4">
@@ -100,12 +97,12 @@ export default function EditProfile() {
           </div>
           <div className="flex-1">
             <p className="text-sm font-bold text-white uppercase tracking-wider">Cắt! Hoàn hảo.</p>
-            <p className="mt-1 text-xs text-gray-400">Hồ sơ đã được lưu vào cuộn phim.</p>
+            <p className="mt-1 text-xs text-gray-400">Hồ sơ đã được cập nhật.</p>
           </div>
         </div>
       ));
       
-      // Chờ 1 chút rồi về trang Profile
+      // 4. Quay về trang Profile (sẽ tự động hiển thị ảnh mới)
       setTimeout(() => navigate('/profile'), 1500);
 
     } catch (error) {
@@ -121,38 +118,30 @@ export default function EditProfile() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#EAEAEA] font-sans flex items-center justify-center p-4 relative overflow-hidden">
       
-      {/* Background Texture (Màn chiếu) */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-[0.05]"></div>
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/80 via-transparent to-black/80 pointer-events-none"></div>
 
-      {/* ================= FILM STRIP CONTAINER ================= */}
       <div className="relative z-10 w-full max-w-2xl animate-slide-up">
         
-        {/* Header Label */}
         <div className="text-center mb-8">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-[#D4AF37] text-black font-bold text-xs uppercase tracking-[0.3em] rounded-sm transform -rotate-2 shadow-[0_0_15px_rgba(212,175,55,0.4)]">
             <Film className="w-3 h-3" /> Casting Profile
           </span>
         </div>
 
-        {/* --- MAIN FILM STRIP --- */}
         <div className="flex bg-[#111] shadow-2xl overflow-hidden rounded-lg">
           
-          {/* SPROCKET HOLES (LEFT) */}
           <div className="w-12 bg-[#050505] border-r border-[#222] flex flex-col items-center py-4 gap-6 relative z-20">
             {[...Array(12)].map((_, i) => (
               <div key={i} className="w-6 h-4 bg-[#222] rounded-[2px] shadow-inner"></div>
             ))}
           </div>
 
-          {/* CONTENT AREA (CENTER) */}
           <div className="flex-1 bg-[#141414] relative">
             
-            {/* Film Frame Lines */}
             <div className="absolute top-0 left-0 w-full h-[2px] bg-[#333]"></div>
             <div className="absolute bottom-0 left-0 w-full h-[2px] bg-[#333]"></div>
 
-            {/* FORM BODY */}
             <div className="p-8 md:p-12">
               
               <div className="flex justify-between items-start mb-10 border-b border-white/5 pb-4">
@@ -181,11 +170,9 @@ export default function EditProfile() {
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-10">
                   
-                  {/* --- SCENE 1: THE STAR (AVATAR CLICKABLE) --- */}
                   <div className="flex flex-col items-center justify-center">
                     <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
                       
-                      {/* Frame viền phim cho Avatar */}
                       <div className="absolute -inset-4 border-2 border-[#D4AF37]/20 rounded-full animate-[spin_30s_linear_infinite]">
                          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#D4AF37] rounded-full"></div>
@@ -197,26 +184,21 @@ export default function EditProfile() {
                           alt="Profile"
                           className="w-full h-full object-cover filter brightness-90 group-hover:brightness-110 transition-all duration-500 group-hover:scale-110"
                         />
-                        {/* Overlay: Upload Icon */}
                         <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[2px]">
                           <Upload className="w-6 h-6 text-[#D4AF37] mb-1 animate-bounce" />
                           <span className="text-[9px] text-white font-bold uppercase">Đổi Ảnh</span>
                         </div>
                       </div>
 
-                      {/* Icon trang trí */}
                       <div className="absolute bottom-0 right-0 bg-[#D4AF37] p-2 rounded-full border-4 border-[#141414] z-20 shadow-lg">
                         <ChefHat className="w-4 h-4 text-black" />
                       </div>
                     </div>
-                    {/* Input file ẩn */}
                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                   </div>
 
-                  {/* --- SCENE 2: THE SCRIPT (INPUTS) --- */}
                   <div className="space-y-8">
                     
-                    {/* Input: Display Name */}
                     <div className="group relative">
                       <label className="absolute -top-3 left-0 text-[10px] font-bold text-[#D4AF37] bg-[#141414] px-2 uppercase tracking-widest flex items-center gap-1">
                         <User className="w-3 h-3" /> Nhân Vật Chính (Tên)
@@ -231,7 +213,6 @@ export default function EditProfile() {
                       />
                     </div>
 
-                    {/* Input: Bio */}
                     <div className="group relative">
                       <label className="absolute -top-3 left-0 text-[10px] font-bold text-[#D4AF37] bg-[#141414] px-2 uppercase tracking-widest flex items-center gap-1">
                         <FileText className="w-3 h-3" /> Kịch Bản (Tiểu Sử)
@@ -251,7 +232,6 @@ export default function EditProfile() {
 
                   </div>
 
-                  {/* --- FINALE: ACTIONS --- */}
                   <div className="flex items-center gap-4 pt-6 border-t border-[#333] border-dashed">
                     <button 
                       type="button"
@@ -283,7 +263,6 @@ export default function EditProfile() {
             </div>
           </div>
 
-          {/* SPROCKET HOLES (RIGHT) */}
           <div className="w-12 bg-[#050505] border-l border-[#222] flex flex-col items-center py-4 gap-6 relative z-20">
             {[...Array(12)].map((_, i) => (
               <div key={i} className="w-6 h-4 bg-[#222] rounded-[2px] shadow-inner"></div>
@@ -292,7 +271,6 @@ export default function EditProfile() {
 
         </div>
         
-        {/* Footer Note */}
         <div className="text-center mt-6 text-[#333] text-[10px] uppercase tracking-[0.2em] font-mono">
           Cinetaste Studios • Est. 2024
         </div>
