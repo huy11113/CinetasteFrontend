@@ -9,6 +9,7 @@ import {
 import { recipeService } from '../services/recipeService';
 import { Recipe } from '../types';
 import toast from 'react-hot-toast';
+import CommentsSection from '../components/ui/CommentsSection'; // Import Component Bình Luận Mới
 
 // --- CONFIG: BẢNG MAP ICON ---
 const NUTRITION_MAP: Record<string, { emoji: string; label: string }> = {
@@ -23,9 +24,8 @@ const NUTRITION_MAP: Record<string, { emoji: string; label: string }> = {
 };
 
 export default function RecipeDetail() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>(); // Thêm type cho id
   const [recipe, setRecipe] = useState<Recipe | null>(null);
-  // Thay đổi tab mặc định sang 'instructions' để người dùng thấy cách làm ngay
   const [activeTab, setActiveTab] = useState<'ingredients' | 'instructions' | 'nutrition' | 'reviews'>('instructions');
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -80,17 +80,16 @@ export default function RecipeDetail() {
     <div className="min-h-screen bg-[#0E0E10] text-[#EAEAEA] font-sans selection:bg-[#D4AF37] selection:text-black pb-20">
       
       {/* ==================================================================
-          1. HEADER & HERO SECTION (Cải tiến: Thông tin rõ ràng hơn)
+          1. HEADER & HERO SECTION
       ================================================================== */}
       <div className="relative h-[55vh] lg:h-[65vh] w-full group">
-        {/* Background Image with Parallax feel */}
+        {/* Background Image */}
         <div className="absolute inset-0 overflow-hidden">
           <img 
             src={recipe.mainImageUrl} 
             alt={recipe.title} 
             className="w-full h-full object-cover transform transition-transform duration-[10s] group-hover:scale-110 filter brightness-[0.7]"
           />
-          {/* Advanced Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-[#0E0E10]" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0E0E10] via-[#0E0E10]/60 to-transparent" />
         </div>
@@ -128,14 +127,14 @@ export default function RecipeDetail() {
               
               <div className="flex items-center gap-4 text-sm font-medium text-gray-300 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                 {recipe.author && (
-                  <div className="flex items-center gap-2">
+                  <Link to={`/profile/${recipe.author.username || recipe.author.id}`} className="flex items-center gap-2 group cursor-pointer hover:bg-white/10 px-2 py-1 rounded-full transition-all">
                     <img 
                       src={recipe.author.avatarUrl || `https://ui-avatars.com/api/?name=${recipe.author.name}&background=random`}
                       alt={recipe.author.name}
-                      className="w-8 h-8 rounded-full border border-white/20"
+                      className="w-8 h-8 rounded-full border border-white/20 group-hover:border-[#D4AF37]"
                     />
-                    <span className="text-white">{recipe.author.name}</span>
-                  </div>
+                    <span className="text-white group-hover:text-[#D4AF37] transition-colors">{recipe.author.name}</span>
+                  </Link>
                 )}
                 <span className="w-1 h-1 bg-gray-500 rounded-full"></span>
                 <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {new Date(recipe.createdAt).toLocaleDateString('vi-VN')}</span>
@@ -182,14 +181,14 @@ export default function RecipeDetail() {
               </p>
             </div>
 
-            {/* TAB NAVIGATION (Sticky Style) */}
+            {/* TAB NAVIGATION */}
             <div className="sticky top-4 z-30 bg-[#0E0E10]/95 backdrop-blur-sm py-2 border-b border-white/10 mb-8">
               <div className="flex gap-8 overflow-x-auto no-scrollbar">
                 {[
                   { id: 'instructions', label: 'Cách Làm' },
                   { id: 'ingredients', label: 'Nguyên Liệu' },
                   { id: 'nutrition', label: 'Dinh Dưỡng' },
-                  { id: 'reviews', label: 'Đánh Giá' }
+                  { id: 'reviews', label: 'Bình Luận' } // Đổi tên nhãn
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -236,14 +235,12 @@ export default function RecipeDetail() {
                             {step.description}
                           </p>
                           
-                          {/* Image */}
                           {step.imageUrl && (
                             <div className="mt-4 rounded-xl overflow-hidden border border-white/10 shadow-lg max-w-xl">
                               <img src={step.imageUrl} alt={`Bước ${step.step}`} className="w-full object-cover hover:scale-105 transition-transform duration-700" />
                             </div>
                           )}
 
-                          {/* Tip Box */}
                           {idx % 3 === 0 && (
                             <div className="mt-4 flex gap-4 bg-[#D4AF37]/5 p-4 rounded-xl border border-[#D4AF37]/20">
                               <div className="p-2 bg-[#D4AF37]/10 rounded-full h-fit">
@@ -335,28 +332,20 @@ export default function RecipeDetail() {
                 </div>
               )}
 
-              {/* --- REVIEWS (Placeholder) --- */}
+              {/* --- COMMENTS SECTION (TÍCH HỢP MỚI) --- */}
               {activeTab === 'reviews' && (
-                <div className="animate-fade-in bg-[#1A1A1E] rounded-2xl p-8 border border-white/5 text-center py-16">
-                  <div className="inline-block p-4 rounded-full bg-white/5 mb-4">
-                    <Star className="w-12 h-12 text-[#D4AF37]" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Đánh giá & Bình luận</h3>
-                  <p className="text-gray-400 mb-6">Tính năng cộng đồng đang được phát triển. Hãy quay lại sau nhé!</p>
-                  <button className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors font-medium">
-                    Viết đánh giá đầu tiên
-                  </button>
-                </div>
+                 <div className="animate-fade-in">
+                    <CommentsSection recipeId={recipe.id} />
+                 </div>
               )}
             </div>
           </div>
 
-          {/* --- RIGHT COLUMN (SIDEBAR - 4 CỘT) --- */}
+          {/* --- RIGHT COLUMN (SIDEBAR) --- */}
           <div className="lg:col-span-4 space-y-8">
             
-            {/* AI Action Card - Highlighted */}
+            {/* AI Action Card */}
             <div className="bg-gradient-to-br from-[#1A1A1E] to-black p-1 rounded-2xl relative group">
-              {/* Border Gradient Effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-[#D4AF37] via-[#B23A48] to-[#D4AF37] rounded-2xl opacity-20 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
               
               <div className="bg-[#131315] p-6 rounded-xl relative h-full flex flex-col items-center text-center">
@@ -373,7 +362,7 @@ export default function RecipeDetail() {
               </div>
             </div>
 
-            {/* Ingredient Checklist Summary (Mini) */}
+            {/* Checklist Summary */}
             <div className="bg-[#1A1A1E] p-6 rounded-2xl border border-white/5">
               <h4 className="font-bold text-white mb-4 flex items-center gap-2">
                 <Utensils className="w-4 h-4 text-[#D4AF37]" /> Công cụ

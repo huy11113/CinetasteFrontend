@@ -9,16 +9,15 @@ import {
   LogOut,
   Heart,
   Bell,
-  ChefHat  // <-- THÊM ICON MỚI
 } from 'lucide-react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Button from './Button';
 import { type User } from '../../contexts/AuthContext';
 import SearchBar from './SearchBar';
-import ThemeToggleButton from '../ThemeToggleButton'; // <-- IMPORT COMPONENT MỚI
+import ThemeToggleButton from '../ThemeToggleButton';
 
-// --- COMPONENT AVATAR (Dùng để hiển thị ảnh hoặc chữ cái) ---
+// --- COMPONENT AVATAR ---
 const Avatar = ({ user }: { user: User }) => {
   const { displayName, username, profileImageUrl } = user;
   
@@ -44,33 +43,32 @@ const Avatar = ({ user }: { user: User }) => {
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isNotifyOpen, setIsNotifyOpen] = useState(false); // <-- State cho chuông thông báo
-  
-  // --- THÊM MỚI: State cho modal tìm kiếm ---
+  const [isNotifyOpen, setIsNotifyOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  // ------------------------------------------
-  
   const [scrolled, setScrolled] = useState(false);
+  
   const location = useLocation();
-  const isOnHomePage = location.pathname === '/';
+  const navigate = useNavigate();
+  
+  // Kiểm tra các trang không có hiệu ứng cuộn (luôn có background)
+  const noScrollEffectPages = ['/login', '/register'];
+  const hasScrollEffect = !noScrollEffectPages.includes(location.pathname);
   
   const profileMenuRef = useRef<HTMLDivElement>(null);
-  const notifyMenuRef = useRef<HTMLDivElement>(null); // <-- Ref cho chuông thông báo
+  const notifyMenuRef = useRef<HTMLDivElement>(null);
   const { user, logout, isLoading } = useAuth();
 
-  // --- THÊM MỚI: useNavigate ---
-  const navigate = useNavigate();
-  // -----------------------------
-
-  // --- Logic hiệu ứng cuộn chuột ---
+  // --- Logic hiệu ứng cuộn chuột (chỉ áp dụng cho các trang có hiệu ứng) ---
   useEffect(() => {
+    if (!hasScrollEffect) return; // Không áp dụng hiệu ứng cho login/register
+    
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll);
     handleScroll(); 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [hasScrollEffect]);
 
   // --- Logic đóng dropdown khi click ra ngoài ---
   useEffect(() => {
@@ -86,25 +84,20 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // --- THÊM MỚI: Logic đóng modal search khi chuyển trang ---
+  // --- Logic đóng modal search khi chuyển trang ---
   useEffect(() => {
-    if (isSearchOpen) {
-      setIsSearchOpen(false);
-    }
-  }, [isSearchOpen, location.pathname]);
-  // ----------------------------------------------------
+    setIsSearchOpen(false);
+  }, [location.pathname]);
 
-  // --- THÊM MỚI: Hàm xử lý tìm kiếm ---
+  // --- Hàm xử lý tìm kiếm ---
   const handleSearch = (query: string) => {
     if (query.trim()) {
       setIsSearchOpen(false);
       navigate(`/browse?q=${encodeURIComponent(query)}`);
     }
   };
-  // ------------------------------------
 
   // --- Class styles ---
-  // Style link mới (gạch chân)
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `relative flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
       isActive
@@ -115,7 +108,7 @@ export default function Navbar() {
     } hover:after:scale-x-100`;
   
   const mobileNavLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `block px-3 py-2 rounded-md text-base font-medium ${
+    `block px-3 py-2 rounded-md text-base font-medium transition-colors ${
       isActive
         ? 'text-white bg-cinematic-accent'
         : 'text-gray-300 hover:text-white hover:bg-cinematic-gray'
@@ -123,23 +116,26 @@ export default function Navbar() {
   
   const dropdownLinkClass = "flex items-center px-4 py-2 text-sm text-gray-300 hover:bg-cinematic-gray-light hover:text-white w-full text-left rounded-md transition-colors";
 
-  // Class động cho Navbar (cho hiệu ứng cuộn)
+  // Class động cho Navbar
   const navClasses = `
     fixed top-0 left-0 right-0 z-50 
     transition-all duration-300 ease-in-out
-    ${(scrolled || !isOnHomePage) 
-      ? 'bg-cinematic-dark/95 backdrop-blur-sm border-b border-gray-800' 
-      : 'bg-transparent border-b border-transparent'
+    ${hasScrollEffect 
+      ? (scrolled 
+          ? 'bg-cinematic-dark/95 backdrop-blur-sm border-b border-gray-800' 
+          : 'bg-transparent border-b border-transparent'
+        )
+      : 'bg-cinematic-dark/95 backdrop-blur-sm border-b border-gray-800' // Luôn có background cho login/register
     }
   `;
 
   return (
-    <> {/* <-- THÊM: Bọc bằng Fragment */}
+    <>
       <nav className={navClasses}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             
-            {/* 1. Logo (Bên trái) */}
+            {/* Logo */}
             <Link to="/" className="flex-shrink-0 flex items-center space-x-2 group">
               <Film className="w-8 h-8 text-cinematic-accent group-hover:text-cinematic-gold transition-colors" />
               <span className="text-2xl font-display font-bold bg-gradient-to-r from-cinematic-gold to-cinematic-accent bg-clip-text text-transparent">
@@ -147,10 +143,10 @@ export default function Navbar() {
               </span>
             </Link>
 
-            {/* 2. Menu chính và Auth (Bên phải) - THEO YÊU CẦU MỚI */}
+            {/* Menu Desktop */}
             <div className="hidden md:flex items-center space-x-6">
               
-              {/* Các link điều hướng */}
+              {/* Navigation Links */}
               <div className="flex items-center space-x-4">
                 <NavLink to="/" className={navLinkClass}>
                   <span>Trang chủ</span>
@@ -166,61 +162,64 @@ export default function Navbar() {
                 </NavLink>
               </div>
 
-              {/* Ngăn cách */}
+              {/* Divider */}
               <div className="h-6 w-px bg-gray-700"></div>
 
-              {/* Các nút Auth */}
-              <div className="flex items-center space-x-4">
-                {/* --- THÊM NÚT TÌM KIẾM (LUÔN HIỂN THỊ) --- */}
+              {/* Auth Section */}
+              <div className="flex items-center space-x-3">
+                {/* Search Button */}
                 <button 
                   onClick={() => setIsSearchOpen(true)}
-                  className="p-2 text-gray-300 hover:text-cinematic-accent transition-colors" 
-                  title="Tìm kiếm"
+                  className="p-2 text-gray-300 hover:text-cinematic-accent hover:bg-cinematic-gray rounded-full transition-colors" 
+                  aria-label="Tìm kiếm"
                 >
                   <Search className="w-5 h-5" />
                 </button>
-                {/* ------------------------------------------- */}
 
                 {!isLoading && (
                   <>
                     {user ? (
-                      // --- ĐÃ ĐĂNG NHẬP ---
                       <>
-                        {/* --- THÊM MỚI: NÚT THÔNG BÁO --- */}
+                        {/* Notification Button */}
                         <div ref={notifyMenuRef} className="relative">
                           <button
-                            onClick={() => setIsNotifyOpen(!isNotifyOpen)}
+                            onClick={() => {
+                              setIsNotifyOpen(!isNotifyOpen);
+                              setIsProfileOpen(false);
+                            }}
                             className="relative p-2 rounded-full text-gray-300 hover:text-cinematic-accent hover:bg-cinematic-gray transition-colors"
-                            title="Thông báo"
+                            aria-label="Thông báo"
                           >
                             <Bell className="w-5 h-5" />
-                            {/* Dấu chấm đỏ (ví dụ) */}
-                            <span className="absolute top-2 right-2 block w-2 h-2 bg-cinematic-accent rounded-full"></span>
+                            <span className="absolute top-1.5 right-1.5 block w-2 h-2 bg-red-500 rounded-full ring-2 ring-cinematic-dark"></span>
                           </button>
 
-                          {/* Dropdown Thông báo */}
+                          {/* Notification Dropdown */}
                           {isNotifyOpen && (
-                            <div className="absolute right-0 top-12 mt-2 w-80 bg-cinematic-gray rounded-lg shadow-lg border border-gray-700 z-50 animate-slideDown origin-top-right">
+                            <div className="absolute right-0 top-full mt-2 w-80 bg-cinematic-gray rounded-lg shadow-xl border border-gray-700 z-50 animate-slideDown origin-top-right">
                               <div className="p-3 border-b border-gray-700">
                                 <h3 className="text-base font-semibold text-white">Thông báo</h3>
                               </div>
                               <div className="py-2 max-h-80 overflow-y-auto">
-                                {/* --- Thông báo mẫu --- */}
-                                <div className="px-4 py-3 hover:bg-cinematic-gray-light cursor-pointer">
+                                <div className="px-4 py-3 hover:bg-cinematic-gray-light cursor-pointer transition-colors">
                                   <p className="text-sm text-white font-medium">Chào mừng đến với CineTaste!</p>
-                                  <p className="text-xs text-gray-400">Hãy khám phá các công thức ngay.</p>
+                                  <p className="text-xs text-gray-400 mt-1">Hãy khám phá các công thức ngay.</p>
                                 </div>
-                                <div className="px-4 py-3 hover:bg-cinematic-gray-light cursor-pointer border-t border-gray-700">
+                                <div className="px-4 py-3 hover:bg-cinematic-gray-light cursor-pointer border-t border-gray-700 transition-colors">
                                   <p className="text-sm text-white">Công thức "Bánh Táo" của bạn đã được duyệt.</p>
-                                  <p className="text-xs text-gray-400">2 giờ trước</p>
+                                  <p className="text-xs text-gray-400 mt-1">2 giờ trước</p>
                                 </div>
-                                <div className="px-4 py-3 hover:bg-cinematic-gray-light cursor-pointer border-t border-gray-700">
+                                <div className="px-4 py-3 hover:bg-cinematic-gray-light cursor-pointer border-t border-gray-700 transition-colors">
                                   <p className="text-sm text-white">@chef_auguste đã theo dõi bạn.</p>
-                                  <p className="text-xs text-gray-400">1 ngày trước</p>
+                                  <p className="text-xs text-gray-400 mt-1">1 ngày trước</p>
                                 </div>
                               </div>
                               <div className="p-2 border-t border-gray-700 text-center">
-                                <Link to="/notifications" className="text-sm text-cinematic-accent hover:underline">
+                                <Link 
+                                  to="/notifications" 
+                                  className="text-sm text-cinematic-accent hover:underline"
+                                  onClick={() => setIsNotifyOpen(false)}
+                                >
                                   Xem tất cả
                                 </Link>
                               </div>
@@ -228,86 +227,86 @@ export default function Navbar() {
                           )}
                         </div>
 
-                        {/* --- MENU PROFILE (USER) --- */}
+                        {/* Profile Menu */}
                         <div ref={profileMenuRef} className="relative">
                           <button
-                            onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="rounded-full flex items-center transition-opacity hover:opacity-80"
-                            title="Tài khoản"
+                            onClick={() => {
+                              setIsProfileOpen(!isProfileOpen);
+                              setIsNotifyOpen(false);
+                            }}
+                            className="rounded-full flex items-center transition-opacity hover:opacity-80 ring-2 ring-transparent hover:ring-cinematic-accent"
+                            aria-label="Tài khoản"
                           >
                             <Avatar user={user} />
                           </button>
 
-                          {/* Dropdown Profile */}
-{isProfileOpen && (
-  <div className="absolute right-0 top-12 mt-2 w-64 bg-cinematic-gray rounded-lg 
-                  shadow-lg border border-gray-700 py-2 z-50 animate-slideDown origin-top-right">
-    
-    {/* Header với avatar và tên */}
-    <div className="px-4 py-3 border-b border-gray-700 flex items-center space-x-3">
-      <div className="flex-shrink-0">
-        <Avatar user={user} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-white truncate">
-          {user.displayName || user.username}
-        </p>
-        <p className="text-xs text-gray-400 truncate">
-          @{user.username}
-        </p>
-      </div>
-    </div>
-    
-    {/* Menu items */}
-    <div className="p-2 space-y-1">
-      {/* Link đến profile */}
-      <Link 
-        to="/profile" 
-        className={dropdownLinkClass}
-        onClick={() => setIsProfileOpen(false)}
-      >
-        <UserIcon className="w-4 h-4 mr-3 text-gray-400" />
-        Hồ sơ của tôi
-      </Link>
-      
-      {/* Link đến favorites */}
-      <Link 
-        to="/profile/favorites"
-        className={dropdownLinkClass}
-        onClick={() => setIsProfileOpen(false)}
-      >
-        <Heart className="w-4 h-4 mr-3 text-gray-400" />
-        Công thức yêu thích
-      </Link>
-      
-      {/* ===== THÊM NÚT CHUYỂN THEME Ở ĐÂY ===== */}
-      <ThemeToggleButton />
-      {/* ======================================== */}
-      
-      {/* Divider */}
-      <div className="border-t border-gray-700 my-1 !mt-2 !mb-1"></div>
+                          {/* Profile Dropdown */}
+                          {isProfileOpen && (
+                            <div className="absolute right-0 top-full mt-2 w-64 bg-cinematic-gray rounded-lg shadow-xl border border-gray-700 py-2 z-50 animate-slideDown origin-top-right">
+                              
+                              {/* User Info Header */}
+                              <div className="px-4 py-3 border-b border-gray-700 flex items-center space-x-3">
+                                <div className="flex-shrink-0">
+                                  <Avatar user={user} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-semibold text-white truncate">
+                                    {user.displayName || user.username}
+                                  </p>
+                                  <p className="text-xs text-gray-400 truncate">
+                                    @{user.username}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              {/* Menu Items */}
+                              <div className="p-2 space-y-1">
+                                <Link 
+                                  to="/profile" 
+                                  className={dropdownLinkClass}
+                                  onClick={() => setIsProfileOpen(false)}
+                                >
+                                  <UserIcon className="w-4 h-4 mr-3 text-gray-400" />
+                                  Hồ sơ của tôi
+                                </Link>
+                                
+                                <Link 
+                                  to="/profile/favorites"
+                                  className={dropdownLinkClass}
+                                  onClick={() => setIsProfileOpen(false)}
+                                >
+                                  <Heart className="w-4 h-4 mr-3 text-gray-400" />
+                                  Công thức yêu thích
+                                </Link>
+                                
+                                {/* Theme Toggle */}
+                                <ThemeToggleButton />
+                                
+                                {/* Divider */}
+                                <div className="border-t border-gray-700 my-1"></div>
 
-      {/* Nút logout */}
-      <button
-        onClick={() => {
-          logout();
-          setIsProfileOpen(false);
-        }}
-        className={`${dropdownLinkClass} text-cinematic-accent hover:!text-cinematic-accent-light`}
-      >
-        <LogOut className="w-4 h-4 mr-3" />
-        Đăng xuất
-      </button>
-    </div>
-  </div>
-)}
+                                {/* Logout */}
+                                <button
+                                  onClick={() => {
+                                    logout();
+                                    setIsProfileOpen(false);
+                                  }}
+                                  className={`${dropdownLinkClass} text-red-400 hover:!text-red-300 hover:!bg-red-500/10`}
+                                >
+                                  <LogOut className="w-4 h-4 mr-3" />
+                                  Đăng xuất
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </>
                     ) : (
-                      // --- CHƯA ĐĂNG NHẬP ---
                       <>
-                        {/* Nút search đã bị chuyển ra ngoài */}
-                        <Link to="/login" className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium">
+                        <Link 
+                          to="/login" 
+                          className="text-gray-300 hover:text-white transition-colors px-3 py-2 rounded-md text-sm font-medium"
+                        >
                           Đăng nhập
                         </Link>
                         <Button as="link" href="/register" size="sm" variant="primary">
@@ -320,18 +319,19 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* 3. Nút mở Menu (Mobile) */}
-            <div className="md:hidden flex items-center space-x-2"> {/* THÊM: Nút search cho mobile */}
+            {/* Mobile Menu Button */}
+            <div className="md:hidden flex items-center space-x-2">
               <button 
                 onClick={() => setIsSearchOpen(true)}
                 className="p-2 text-gray-300 hover:text-cinematic-accent transition-colors" 
-                title="Tìm kiếm"
+                aria-label="Tìm kiếm"
               >
                 <Search className="w-6 h-6" />
               </button>
               <button
                 className="p-2 text-gray-300 hover:text-cinematic-accent transition-colors"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                aria-label="Menu"
               >
                 {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
@@ -340,14 +340,22 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* 4. Menu Mobile (Đã dịch) */}
+        {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden bg-cinematic-gray border-t border-gray-800 animate-slideDown">
             <div className="px-4 py-4 space-y-2">
-              <NavLink to="/" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Trang chủ</NavLink>
-              <NavLink to="/browse" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Khám phá</NavLink>
-              <NavLink to="/scene-to-recipe" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>AI Scene</NavLink>
-              <NavLink to="/community" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>Cộng đồng</NavLink>
+              <NavLink to="/" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>
+                Trang chủ
+              </NavLink>
+              <NavLink to="/browse" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>
+                Khám phá
+              </NavLink>
+              <NavLink to="/scene-to-recipe" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>
+                AI Scene
+              </NavLink>
+              <NavLink to="/community" className={mobileNavLinkClass} onClick={() => setIsMenuOpen(false)}>
+                Cộng đồng
+              </NavLink>
               
               <div className="pt-3 border-t border-gray-700 space-y-2">
                 {!isLoading && (
@@ -365,7 +373,7 @@ export default function Navbar() {
                             logout();
                             setIsMenuOpen(false);
                           }}
-                          className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-cinematic-accent hover:bg-cinematic-gray"
+                          className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-red-400 hover:bg-red-500/10 transition-colors"
                         >
                           Đăng xuất
                         </button>
@@ -376,7 +384,9 @@ export default function Navbar() {
                           Đăng nhập
                         </NavLink>
                         <Link to="/register" onClick={() => setIsMenuOpen(false)}>
-                          <Button className="w-full text-center" variant="primary">Đăng ký</Button>
+                          <Button className="w-full text-center" variant="primary">
+                            Đăng ký
+                          </Button>
                         </Link>
                       </>
                     )}
@@ -388,18 +398,16 @@ export default function Navbar() {
         )}
       </nav>
 
-      {/* --- THÊM MỚI: MODAL TÌM KIẾM --- */}
+      {/* Search Modal */}
       {isSearchOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex justify-center items-start pt-20"
-        >
-          {/* Lớp nền mờ */}
+        <div className="fixed inset-0 z-50 flex justify-center items-start pt-20">
+          {/* Overlay */}
           <div 
-            className="absolute inset-0 bg-cinematic-darker/80 backdrop-blur-sm animate-fade-in"
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fade-in"
             onClick={() => setIsSearchOpen(false)}
           ></div>
           
-          {/* Nội dung Modal */}
+          {/* Modal Content */}
           <div className="relative z-10 w-full max-w-3xl px-4 animate-slideDown">
             <SearchBar 
               onSearch={handleSearch}
@@ -407,14 +415,14 @@ export default function Navbar() {
             />
             <button 
               onClick={() => setIsSearchOpen(false)}
-              className="absolute -top-10 right-4 text-gray-400 hover:text-white"
+              className="absolute -top-10 right-4 text-gray-400 hover:text-white transition-colors"
+              aria-label="Đóng"
             >
               <X className="w-8 h-8" />
             </button>
           </div>
         </div>
       )}
-      {/* --------------------------------- */}
     </>
   );
 }

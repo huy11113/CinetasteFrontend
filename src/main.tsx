@@ -15,7 +15,9 @@ createRoot(document.getElementById('root')!).render(
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}> {/* <-- BỌC NGOÀI CÙNG */}
       <ThemeProvider>
         <AuthProvider>
-          <App />
+          <App >
+            
+          </App>
         </AuthProvider>
       </ThemeProvider>
     </GoogleOAuthProvider>

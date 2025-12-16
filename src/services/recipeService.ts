@@ -1,10 +1,20 @@
 import apiClient from './apiClient';
 import { Recipe } from '../types'; 
 
+// Định nghĩa kiểu dữ liệu cho Bình luận
+export interface Comment {
+  id: number;
+  authorId: string;
+  authorDisplayName: string;      
+  authorProfileImageUrl: string;
+  content: string;
+  createdAt: string;
+  parentId?: number;
+}
+
 export const recipeService = {
   /**
    * Lấy danh sách công thức (Phân trang & Sắp xếp)
-   * Dùng cho: Trang chủ (Home), Trang duyệt (Browse)
    */
   getAllRecipes: async (page = 0, size = 10, sort = 'createdAt,desc') => {
     try {
@@ -20,30 +30,22 @@ export const recipeService = {
 
   /**
    * Lấy chi tiết công thức theo ID
-   * Dùng cho: Trang chi tiết (RecipeDetail)
    */
   getRecipeById: async (id: string): Promise<Recipe> => {
     try {
       const response = await apiClient.get<Recipe>(`/recipes/${id}`);
       const recipe = response.data;
 
-      // --- XỬ LÝ DỮ LIỆU AN TOÀN ---
-      
-      // 1. Xử lý nutrition/nutritionInfo
-      // Backend của bạn có thể trả về 'nutrition' (Map) hoặc 'nutritionInfo' (String JSON)
-      // Code này kiểm tra và chuẩn hóa về dạng Object để UI dễ dùng
+      // --- XỬ LÝ DỮ LIỆU AN TOÀN (Giữ nguyên code của bạn) ---
       if (typeof recipe.nutritionInfo === 'string') {
         try {
-          // Nếu là chuỗi JSON, parse ra object
-          // Gán vào nutrition để thống nhất
           (recipe as any).nutrition = JSON.parse(recipe.nutritionInfo);
         } catch (e) {
           console.warn("Không thể parse nutritionInfo JSON", e);
           (recipe as any).nutrition = {};
         }
       } 
-      // Nếu backend đã trả về nutrition dạng Map/Object thì giữ nguyên
-
+      
       return recipe;
     } catch (error) {
       console.error(`Lỗi khi lấy công thức ID ${id}:`, error);
@@ -53,15 +55,9 @@ export const recipeService = {
 
   /**
    * Lấy danh sách công thức của một User cụ thể
-   * Dùng cho: Trang cá nhân (Profile)
-   */
-/**
-   * Lấy danh sách công thức của một User cụ thể
-   * API MỚI: /recipes/author/{authorId}
    */
   getRecipesByUserId: async (userId: string, page = 0, size = 10) => {
     try {
-   
       const response = await apiClient.get(`/recipes/author/${userId}`, {
         params: { page, size, sort: 'createdAt,desc' }
       });
@@ -124,16 +120,41 @@ export const recipeService = {
 
   /**
    * Toggle Yêu thích (Favorite)
-   * Lưu ý: Cần Backend hỗ trợ endpoint này
    */
   toggleFavorite: async (id: string) => {
     try {
-      // Nếu Backend chưa có endpoint này, hàm này sẽ lỗi 404
       await apiClient.post(`/recipes/${id}/favorites`);
     } catch (error) {
       console.error("Lỗi khi like/unlike:", error);
       throw error;
     }
+  },
+
+  // --- PHẦN MỚI THÊM VÀO CHO TÍNH NĂNG CỘNG ĐỒNG ---
+
+  /**
+   * Lấy danh sách bình luận
+   */
+  getComments: async (recipeId: string): Promise<Comment[]> => {
+    try {
+      const response = await apiClient.get(`/recipes/${recipeId}/comments`);
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi tải bình luận:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Thêm bình luận mới
+   */
+  addComment: async (recipeId: string, data: { content: string, parentId?: number }) => {
+    try {
+      const response = await apiClient.post(`/recipes/${recipeId}/comments`, data);
+      return response.data;
+    } catch (error) {
+      console.error("Lỗi gửi bình luận:", error);
+      throw error;
+    }
   }
-  
 };
