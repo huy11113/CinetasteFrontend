@@ -15,8 +15,8 @@ import { Link } from 'react-router-dom';
 // ============================================================================
 // CONSTANTS
 // ============================================================================
-const MAX_COMMENT_LENGTH = 300; // Số ký tự hiển thị trước khi "Xem thêm"
-const MAX_REPLIES_SHOW = 3; // Số reply hiển thị ban đầu
+const MAX_COMMENT_LENGTH = 300;
+const MAX_REPLIES_SHOW = 3;
 
 // ============================================================================
 // INTERFACES
@@ -330,7 +330,7 @@ function CommentItem({
 
         {/* Action Buttons */}
         <div className="flex items-center gap-4 mt-2 ml-2">
-          {/* Like */}
+          {/* Like Button */}
           <button
             onClick={() => onReact(comment.id, 'like')}
             className={`flex items-center gap-1 text-xs transition-colors ${
@@ -343,7 +343,7 @@ function CommentItem({
             <span>{comment.likes || 0}</span>
           </button>
 
-          {/* Dislike */}
+          {/* Dislike Button */}
           <button
             onClick={() => onReact(comment.id, 'dislike')}
             className={`flex items-center gap-1 text-xs transition-colors ${
@@ -356,7 +356,7 @@ function CommentItem({
             <span>{comment.dislikes || 0}</span>
           </button>
 
-          {/* Reply */}
+          {/* Reply Button */}
           {!isReply && (
             <button
               onClick={() => onReply(comment.id, comment.authorDisplayName)}
@@ -367,7 +367,7 @@ function CommentItem({
             </button>
           )}
 
-          {/* Replies count */}
+          {/* Replies Count */}
           {hasReplies && !isReply && (
             <span className="text-xs text-gray-600">
               {comment.replies!.length} phản hồi
@@ -432,11 +432,13 @@ export default function CommentsSection({ recipeId }: { recipeId: string }) {
     }
   }, [recipeId]);
 
+  // ============================================================================
+  // LOAD COMMENTS - Backend trả về likes, dislikes, userReaction
+  // ============================================================================
   const loadComments = async () => {
     try {
       const data = await recipeService.getComments(recipeId);
       
-      // ✅ SỬA: Backend đã trả về likes/dislikes/userReaction, không cần mock nữa
       const transformedComments: CommentWithInteractions[] = data.map(comment => ({
         ...comment,
         likes: comment.likes || 0,
@@ -445,7 +447,7 @@ export default function CommentsSection({ recipeId }: { recipeId: string }) {
         replies: [] as CommentWithInteractions[]
       }));
 
-      // Organize replies (dựa vào parentId)
+      // Organize replies (nested comments)
       const commentsMap = new Map<number, CommentWithInteractions>();
       const rootComments: CommentWithInteractions[] = [];
 
@@ -467,9 +469,13 @@ export default function CommentsSection({ recipeId }: { recipeId: string }) {
       setComments(rootComments);
     } catch (error) {
       console.error("Lỗi tải bình luận:", error);
+      toast.error("Không thể tải bình luận");
     }
   };
 
+  // ============================================================================
+  // SUBMIT NEW COMMENT
+  // ============================================================================
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
@@ -490,61 +496,84 @@ export default function CommentsSection({ recipeId }: { recipeId: string }) {
       toast.success(replyingTo ? "Đã trả lời bình luận!" : "Đã gửi bình luận!");
       loadComments();
     } catch (error) {
+      console.error("Lỗi gửi bình luận:", error);
       toast.error("Không thể gửi bình luận");
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ============================================================================
+  // HANDLE REACT - SỬA LỖI: GỌI API TRƯỚC, CẬP NHẬT UI SAU
+  // ============================================================================
   const handleReact = async (commentId: number, reaction: 'like' | 'dislike') => {
     if (!user) {
       toast.error("Vui lòng đăng nhập để tương tác");
       return;
     }
 
-    // Optimistic UI update
-    setComments(prevComments => {
-      const updateComment = (comments: CommentWithInteractions[]): CommentWithInteractions[] => {
-        return comments.map(comment => {
-          if (comment.id === commentId) {
-            const isCurrentReaction = comment.userReaction === reaction;
-            const newReaction = isCurrentReaction ? null : reaction;
-            
-            let likes = comment.likes;
-            let dislikes = comment.dislikes;
+    // Lưu trạng thái cũ để rollback nếu lỗi
+    const previousComments = JSON.parse(JSON.stringify(comments));
 
-            // Remove old reaction
-            if (comment.userReaction === 'like') likes--;
-            if (comment.userReaction === 'dislike') dislikes--;
-
-            // Add new reaction
-            if (newReaction === 'like') likes++;
-            if (newReaction === 'dislike') dislikes++;
-
-            return { ...comment, likes, dislikes, userReaction: newReaction };
-          }
-          
-          if (comment.replies) {
-            return { ...comment, replies: updateComment(comment.replies) };
-          }
-          
-          return comment;
-        });
-      };
-
-      return updateComment(prevComments);
-    });
-
-    // Call API to persist reaction
     try {
-      await recipeService.reactToComment(recipeId, commentId, reaction);
+      // ✅ BƯỚC 1: Gọi API trước (không optimistic update)
+      console.log(`📤 Gửi reaction: ${reaction} cho comment ${commentId}`);
+      const result = await recipeService.reactToComment(recipeId, commentId, reaction);
+      
+      console.log("✅ Backend trả về:", result);
+
+      // ✅ BƯỚC 2: Cập nhật UI dựa vào kết quả từ backend (đây là source of truth)
+      setComments(prevComments => {
+        const updateComment = (comments: CommentWithInteractions[]): CommentWithInteractions[] => {
+          return comments.map(comment => {
+            if (comment.id === commentId) {
+              console.log(`🔄 Cập nhật comment ${commentId}:`, {
+                likes: result.likeCount,
+                dislikes: result.dislikeCount,
+                userReaction: result.userCurrentReaction
+              });
+
+              return {
+                ...comment,
+                likes: result.likeCount,
+                dislikes: result.dislikeCount,
+                userReaction: result.userCurrentReaction as 'like' | 'dislike' | null
+              };
+            }
+            
+            // Cập nhật replies nếu có
+            if (comment.replies && comment.replies.length > 0) {
+              return { ...comment, replies: updateComment(comment.replies) };
+            }
+            
+            return comment;
+          });
+        };
+
+        return updateComment(prevComments);
+      });
+
+      // ✅ BƯỚC 3: Hiển thị toast thông báo
+      const reactionName = reaction === 'like' ? 'like' : 'dislike';
+      if (result.userCurrentReaction === reaction) {
+        toast.success(`✅ Đã ${reactionName}`);
+      } else if (result.userCurrentReaction === null) {
+        toast.success(`✅ Đã hủy ${reactionName}`);
+      } else {
+        toast.success(`✅ Chuyển sang ${reactionName}`);
+      }
+
     } catch (error) {
-      // Revert optimistic update nếu API fail
-      loadComments();
-      toast.error("Không thể thực hiện thao tác");
+      console.error("❌ Lỗi reaction:", error);
+      // Rollback về trạng thái cũ nếu API fail
+      setComments(previousComments);
+      toast.error("Không thể thực hiện thao tác. Vui lòng thử lại.");
     }
   };
 
+  // ============================================================================
+  // HANDLE REPLY
+  // ============================================================================
   const handleReply = (commentId: number, parentDisplayName: string) => {
     if (!user) {
       toast.error("Vui lòng đăng nhập để trả lời");
@@ -554,6 +583,9 @@ export default function CommentsSection({ recipeId }: { recipeId: string }) {
     document.getElementById('comment-input')?.focus();
   };
 
+  // ============================================================================
+  // HANDLE USER HOVER
+  // ============================================================================
   const handleUserHover = (
     e: React.MouseEvent,
     authorId: string,
@@ -572,8 +604,12 @@ export default function CommentsSection({ recipeId }: { recipeId: string }) {
     });
   };
 
+  // ============================================================================
+  // RENDER
+  // ============================================================================
   return (
     <div className="bg-[#121212] rounded-3xl border border-white/5 p-6 md:p-8 mt-12 shadow-2xl">
+      {/* Header */}
       <div className="flex items-center gap-3 mb-8">
         <div className="bg-[#D4AF37]/10 p-2 rounded-full">
           <MessageSquare className="w-5 h-5 text-[#D4AF37]" />
@@ -589,7 +625,7 @@ export default function CommentsSection({ recipeId }: { recipeId: string }) {
           <img 
             src={user?.profileImageUrl || `https://ui-avatars.com/api/?name=${user?.displayName || 'Guest'}&background=random`} 
             alt="My Avatar" 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover"
           />
         </div>
         <form onSubmit={handleSubmit} className="flex-1">
@@ -630,7 +666,7 @@ export default function CommentsSection({ recipeId }: { recipeId: string }) {
         </form>
       </div>
 
-      {/* Danh sách bình luận */}
+      {/* Comments List */}
       <div className="space-y-6">
         {comments.map((comment) => (
           <CommentItem

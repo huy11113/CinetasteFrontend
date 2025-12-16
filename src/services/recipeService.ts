@@ -10,6 +10,10 @@ export interface Comment {
   content: string;
   createdAt: string;
   parentId?: number;
+  // ✅ CÁC TRƯỜNG CHO REACTIONS
+  likes: number;
+  dislikes: number;
+  userReaction?: 'like' | 'dislike' | null;
 }
 
 export const recipeService = {
@@ -36,7 +40,7 @@ export const recipeService = {
       const response = await apiClient.get<Recipe>(`/recipes/${id}`);
       const recipe = response.data;
 
-      // --- XỬ LÝ DỮ LIỆU AN TOÀN (Giữ nguyên code của bạn) ---
+      // Xử lý dữ liệu nutrition nếu cần
       if (typeof recipe.nutritionInfo === 'string') {
         try {
           (recipe as any).nutrition = JSON.parse(recipe.nutritionInfo);
@@ -130,8 +134,6 @@ export const recipeService = {
     }
   },
 
-  // --- PHẦN MỚI THÊM VÀO CHO TÍNH NĂNG CỘNG ĐỒNG ---
-
   /**
    * Lấy danh sách bình luận
    */
@@ -154,6 +156,51 @@ export const recipeService = {
       return response.data;
     } catch (error) {
       console.error("Lỗi gửi bình luận:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * ✅ SỬA: React to comment (Like/Dislike)
+   * 
+   * Backend trả về: CommentReactionDto
+   * {
+   *   reactionType: 'like' | 'dislike',
+   *   isActive: boolean,
+   *   likeCount: number,
+   *   dislikeCount: number,
+   *   userCurrentReaction: 'like' | 'dislike' | null
+   * }
+   */
+  reactToComment: async (
+    recipeId: string, 
+    commentId: number, 
+    reactionType: 'like' | 'dislike'
+  ): Promise<{
+    reactionType: string;
+    isActive: boolean;
+    likeCount: number;
+    dislikeCount: number;
+    userCurrentReaction: string | null;
+  }> => {
+    try {
+      console.log(`📤 POST /recipes/${recipeId}/comments/${commentId}/reactions`);
+      console.log(`📦 Payload:`, { reactionType });
+
+      const response = await apiClient.post(
+        `/recipes/${recipeId}/comments/${commentId}/reactions`, 
+        { reactionType }
+      );
+
+      console.log("✅ Response từ Backend:", response.data);
+
+      if (!response.data) {
+        throw new Error("Backend không trả về dữ liệu (undefined)");
+      }
+
+      return response.data; // ✅ RETURN dữ liệu từ backend
+    } catch (error) {
+      console.error("❌ Lỗi react comment:", error);
       throw error;
     }
   }
