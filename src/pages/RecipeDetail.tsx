@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
-  Clock, ChefHat, Flame, Star, Share2, 
+  Clock, ChefHat, Star, Share2, 
   Bookmark, Heart, Printer, Wand2, ChevronLeft, 
   Check, PlayCircle, Sparkles, Lightbulb,
   Utensils, Calendar
@@ -192,7 +192,7 @@ export default function RecipeDetail() {
                 ].map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as never)}
                     className={`pb-3 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap ${
                       activeTab === tab.id ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-white'
                     }`}

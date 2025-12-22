@@ -7,7 +7,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { useGoogleLogin } from '@react-oauth/google';
 import FacebookLogin, {
-  type SuccessResponse as FacebookSuccessResponse // <-- SỬA LỖI 1: Thêm kiểu
+  type SuccessResponse as FacebookSuccessResponse 
 } from '@greatsumini/react-facebook-login';
 import apiClient from '../services/apiClient';
 import { LoginResponse } from '../contexts/AuthContext';
@@ -30,7 +30,7 @@ const FacebookIcon = () => (
 );
 // ----------------------------
 
-const FACEBOOK_APP_ID = "YOUR_FACEBOOK_APP_ID"; // Thay ID của bạn vào đây
+const FACEBOOK_APP_ID = "YOUR_FACEBOOK_APP_ID"; 
 
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
@@ -123,9 +123,9 @@ export default function Register() {
       handleSocialLogin(response.data);
       toast.success(`Chào mừng, ${response.data.displayName || response.data.username}!`);
       navigate('/');
-    } catch (err: unknown) { // <-- SỬA LỖI 3: Dùng 'err: unknown'
+    } catch (err: unknown) { 
       setError("Đăng nhập Google thất bại. Vui lòng thử lại.");
-      console.error("Google Login Failed", err); // In lỗi ra
+      console.error("Google Login Failed", err); //
     } finally {
       setIsGoogleLoading(false);
     }
@@ -133,7 +133,7 @@ export default function Register() {
 
   const googleLogin = useGoogleLogin({ 
     onSuccess: handleGoogleLoginSuccess, 
-    onError: (errorResponse) => { // <-- SỬA LỖI 4: 'errorResponse' đã được sử dụng
+    onError: (errorResponse) => { 
       console.error('Google Login Error', errorResponse);
       setError("Lỗi đăng nhập Google.");
     } 
@@ -151,9 +151,9 @@ export default function Register() {
         handleSocialLogin(res.data);
         toast.success(`Chào mừng, ${res.data.displayName || res.data.username}!`);
         navigate('/');
-      } catch (err: unknown) { // <-- SỬA LỖI 6: Dùng 'err: unknown'
+      } catch (err: unknown) { 
         setError("Đăng nhập Facebook thất bại. Vui lòng thử lại.");
-        console.error("Facebook Login Failed", err); // In lỗi ra
+        console.error("Facebook Login Failed", err); 
       } finally {
         setIsFacebookLoading(false);
       }

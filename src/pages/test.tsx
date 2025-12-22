@@ -4,7 +4,8 @@ import {
   Clock, ChefHat, Star, Share2, 
   Heart, Printer, Wand2, ChevronLeft, 
   Check, PlayCircle, Sparkles, Lightbulb,
-  Utensils, Calendar
+  Utensils, Calendar,
+  Bookmark
 } from 'lucide-react';
 import { recipeService } from '../services/recipeService';
 import { Recipe } from '../types';
@@ -193,7 +194,7 @@ export default function RecipeDetail() {
                 ].map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setActiveTab(tab.id as any)}
+                    onClick={() => setActiveTab(tab.id as never)}
                     className={`pb-3 text-sm font-bold uppercase tracking-wider transition-all relative whitespace-nowrap ${
                       activeTab === tab.id ? 'text-[#D4AF37]' : 'text-gray-500 hover:text-white'
                     }`}

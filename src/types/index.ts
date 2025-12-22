@@ -57,6 +57,7 @@ export interface RecipeStepDetail {
 }
 
 export interface RecipeAuthor {
+  username: string;
   id: string;
   name: string;
   avatarUrl: string | null;
